@@ -1,0 +1,1496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Root Cause Analysis — Appasamy Service Excellence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0F2250; --navy-mid: #1B3A8C; --navy-light: #2347A8;
+    --blue: #1B3A8C; --blue-light: #2F5DC2; --blue-pale: #EEF2FB; --blue-border: #C0CEEE;
+    --teal: #0D9488; --teal-pale: #F0FDFA;
+    --green: #059669; --green-pale: #ECFDF5;
+    --amber: #D97706; --amber-pale: #FFFBEB;
+    --red: #DC2626; --red-pale: #FEF2F2;
+    --purple: #7C3AED; --purple-pale: #F5F3FF;
+    --text: #0F172A; --text-mid: #475569; --text-light: #94A3B8;
+    --border: #E2E8F0; --border-mid: #CBD5E1;
+    --bg: #F1F5F9; --card: #FFFFFF;
+    --radius: 10px; --radius-lg: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "DM Sans", sans-serif; background: var(--bg); color: var(--text); font-size: 14px; display: flex; height: 100vh; overflow: hidden; }
+
+  /* SIDEBAR */
+  .sidebar { width: 220px; flex-shrink: 0; background: var(--navy); display: flex; flex-direction: column; overflow: hidden; }
+  .sidebar-logo { padding: 16px 14px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .sidebar-logo .logo-wrap { background: #fff; border-radius: 8px; padding: 8px 10px; display: inline-block; }
+  .sidebar-logo .sub { font-size: 9px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-top: 6px; padding-left: 2px; }
+  .sidebar-section { padding: 16px 12px 6px; }
+  .sidebar-section-label { font-size: 9px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.3); padding: 0 6px; margin-bottom: 6px; }
+  .nav-item { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 7px; color: rgba(255,255,255,0.6); font-size: 13px; font-weight: 400; cursor: pointer; transition: all 0.15s; margin-bottom: 1px; text-decoration: none; }
+  .nav-item:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.9); }
+  .nav-item.active { background: var(--blue-light); color: #fff; font-weight: 500; }
+  .nav-item svg { width: 15px; height: 15px; flex-shrink: 0; opacity: 0.85; }
+  .nav-badge { margin-left: auto; font-size: 10px; font-weight: 600; background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.8); padding: 1px 6px; border-radius: 10px; }
+  .nav-badge.alert { background: #DC2626; color: #fff; }
+  .equip-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 7px; cursor: pointer; transition: all 0.15s; margin-bottom: 1px; color: rgba(255,255,255,0.55); font-size: 12px; }
+  .equip-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.85); }
+  .equip-item.active { background: rgba(26,86,219,0.25); color: #93C5FD; }
+  .equip-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .equip-count { margin-left: auto; font-size: 10px; color: rgba(255,255,255,0.3); font-family: "DM Mono", monospace; }
+  .sidebar-footer { margin-top: auto; padding: 12px 18px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 10px; }
+  .avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--blue-light); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: #fff; flex-shrink: 0; }
+  .avatar-name { font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.85); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .avatar-role { font-size: 10px; color: rgba(255,255,255,0.4); }
+
+  /* MAIN */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+  .topbar { background: #fff; border-bottom: 1px solid var(--border); padding: 0 24px; height: 56px; display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
+  .topbar-title { font-size: 15px; font-weight: 600; color: var(--text); }
+  .topbar-breadcrumb { font-size: 12px; color: var(--text-light); }
+  .topbar-breadcrumb span { color: var(--text-mid); }
+  .topbar-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .btn-sm { padding: 6px 14px; border-radius: 7px; font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); background: #fff; color: var(--text-mid); font-family: "DM Sans", sans-serif; transition: all 0.15s; display: flex; align-items: center; gap: 5px; text-decoration: none; }
+  .btn-sm:hover { border-color: var(--border-mid); background: var(--bg); }
+  .btn-sm.primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+  .btn-sm.primary:hover { background: #162F77; }
+
+  /* SEARCH */
+  .topbar-search { position: relative; flex: 1; max-width: 380px; margin: 0 16px; }
+  .search-wrap { display: flex; align-items: center; gap: 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 0 12px; height: 36px; transition: all 0.15s; }
+  .search-wrap:focus-within { background: #fff; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(27,58,140,0.1); }
+  .search-icon { color: var(--text-light); flex-shrink: 0; }
+  .search-input { flex: 1; border: none; background: transparent; outline: none; font-family: "DM Sans", sans-serif; font-size: 13px; color: var(--text); min-width: 0; }
+  .search-input::placeholder { color: var(--text-light); }
+  .search-kbd { font-size: 10px; font-family: "DM Mono", monospace; color: var(--text-light); background: var(--border); padding: 1px 5px; border-radius: 4px; border: 1px solid var(--border-mid); flex-shrink: 0; white-space: nowrap; }
+  .search-dropdown { display: none; position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 8px 6px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); z-index: 999; max-height: 300px; overflow-y: auto; }
+  .search-dropdown.open { display: block; }
+  .sd-section-label { font-size: 9px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--text-light); padding: 4px 10px; margin-bottom: 2px; }
+  .sd-item { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 7px; cursor: pointer; transition: background 0.1s; }
+  .sd-item:hover { background: var(--bg); }
+  .sd-item .sd-code { font-size: 11px; font-weight: 700; font-family: "DM Mono", monospace; color: var(--blue); min-width: 40px; }
+  .sd-item .sd-name { font-size: 12px; color: var(--text); flex: 1; }
+  .sd-item .sd-meta { font-size: 11px; color: var(--text-light); }
+  mark.search-highlight { background: #FEF9C3; border-radius: 2px; font-style: normal; }
+
+  /* FILTER BAR */
+  .filter-bar { background: #fff; border-bottom: 1px solid var(--border); padding: 0 24px; height: 44px; display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .filter-label { font-size: 11px; color: var(--text-light); margin-right: 4px; font-weight: 500; }
+  .pill { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); color: var(--text-mid); background: #fff; transition: all 0.15s; }
+  .pill:hover { border-color: var(--blue); color: var(--blue); }
+  .pill.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+  .filter-sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+  .date-range { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-mid); padding: 4px 10px; border: 1px solid var(--border); border-radius: 7px; background: #fff; }
+  .ai-badge { margin-left: auto; display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 500; color: var(--purple); background: var(--purple-pale); padding: 3px 10px; border-radius: 20px; border: 1px solid #DDD6FE; }
+  .ai-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--purple); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(1.3)} }
+
+  /* CONTENT */
+  .content { flex: 1; overflow-y: auto; padding: 20px 24px; }
+  .content::-webkit-scrollbar { width: 4px; }
+  .content::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 4px; }
+
+  /* PROGRESS STRIP */
+  .progress-strip { display: grid; grid-template-columns: 1fr 1fr 1fr 280px; gap: 10px; margin-bottom: 16px; }
+  .prog-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
+  .prog-card .pl { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-light); margin-bottom: 5px; }
+  .prog-card .pv { font-size: 24px; font-weight: 600; font-family: "DM Mono", monospace; color: var(--text); line-height: 1; }
+  .prog-card .ps { font-size: 11px; color: var(--text-light); margin-top: 4px; }
+  .prog-bar-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
+  .prog-bar-label { display: flex; justify-content: space-between; margin-bottom: 8px; }
+  .prog-bar-label span { font-size: 11px; font-weight: 500; color: var(--text-mid); }
+  .prog-bar-label .pct { font-family: "DM Mono", monospace; color: var(--blue); font-weight: 600; }
+  .prog-bg { height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; }
+  .prog-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--blue) 0%, var(--teal) 100%); width: 0; transition: width 1s ease; }
+  .prog-sub { font-size: 11px; color: var(--text-light); margin-top: 6px; display: flex; justify-content: space-between; }
+
+  /* SECTION HEADER */
+  .section-hd { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .s-title { font-size: 12px; font-weight: 600; color: var(--text-mid); }
+  .s-line { flex: 1; height: 1px; background: var(--border); }
+
+  /* MAIN LAYOUT */
+  .rc-layout { display: grid; grid-template-columns: 1fr 360px; gap: 14px; margin-bottom: 14px; }
+
+  /* L1 ACCORDION */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+  .card-head { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .card-head-icon { width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .card-title { font-size: 13px; font-weight: 600; color: var(--text); }
+  .card-sub { font-size: 11px; color: var(--text-light); margin-top: 1px; }
+  .card-action { margin-left: auto; font-size: 11px; font-weight: 500; color: var(--blue); cursor: pointer; padding: 4px 8px; border-radius: 5px; }
+  .card-action:hover { background: var(--blue-pale); }
+
+  .l1-item { border-bottom: 1px solid var(--border); }
+  .l1-item:last-child { border-bottom: none; }
+  .l1-header { display: flex; align-items: center; gap: 12px; padding: 14px 18px; cursor: pointer; transition: background 0.12s; user-select: none; }
+  .l1-header:hover { background: var(--bg); }
+  .l1-header.open { background: var(--blue-pale); }
+  .l1-chevron { width: 16px; height: 16px; transition: transform 0.2s; flex-shrink: 0; color: var(--text-light); }
+  .l1-chevron.open { transform: rotate(90deg); }
+  .l1-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .l1-name { font-size: 13px; font-weight: 500; color: var(--text); flex: 1; }
+  .l1-count { font-family: "DM Mono", monospace; font-size: 12px; font-weight: 600; color: var(--text-mid); min-width: 28px; text-align: right; }
+  .l1-pct { font-size: 11px; color: var(--text-light); min-width: 42px; text-align: right; }
+  .l1-bar { width: 90px; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .l1-fill { height: 100%; border-radius: 2px; }
+
+  .l1-body { display: none; padding: 0 18px 14px 46px; }
+  .l1-body.open { display: block; }
+
+  /* L2 items */
+  .l2-item { margin-bottom: 10px; }
+  .l2-header { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--bg); border-radius: 8px; cursor: pointer; transition: background 0.12s; }
+  .l2-header:hover { background: var(--border); }
+  .l2-header.open { background: #EEF2FB; }
+  .l2-name { font-size: 12px; font-weight: 500; color: var(--text); flex: 1; }
+  .l2-count { font-family: "DM Mono", monospace; font-size: 11px; color: var(--text-mid); }
+  .l2-pct { font-size: 10px; color: var(--text-light); min-width: 36px; text-align: right; }
+  .l2-chevron { width: 13px; height: 13px; transition: transform 0.15s; flex-shrink: 0; color: var(--text-light); }
+  .l2-chevron.open { transform: rotate(90deg); }
+
+  .l2-body { display: none; padding: 8px 0 2px 12px; }
+  .l2-body.open { display: block; }
+  .l2-sample { font-size: 11px; color: var(--text-mid); line-height: 1.6; padding: 8px 12px; background: #FAFBFC; border-left: 3px solid var(--border-mid); border-radius: 0 6px 6px 0; margin-bottom: 6px; font-style: italic; }
+  .l2-sample strong { color: var(--text); font-style: normal; font-weight: 500; }
+
+  /* L3/L4 tags */
+  .l3-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+  .l3-tag { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 500; border: 1px solid var(--border); background: var(--card); color: var(--text-mid); cursor: pointer; transition: all 0.12s; }
+  .l3-tag:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-pale); }
+  .l3-tag .l3-n { font-family: "DM Mono", monospace; font-size: 10px; font-weight: 600; color: var(--blue); background: var(--blue-pale); padding: 1px 5px; border-radius: 3px; }
+
+  /* RIGHT PANEL */
+  .right-stack { display: flex; flex-direction: column; gap: 14px; }
+
+  /* AGE MATRIX */
+  .matrix-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .matrix-table th { padding: 7px 10px; text-align: center; font-size: 9px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-light); background: var(--bg); border-bottom: 1px solid var(--border); }
+  .matrix-table th:first-child { text-align: left; }
+  .matrix-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: center; }
+  .matrix-table tr:last-child td { border-bottom: none; }
+  .matrix-table .row-label { text-align: left; font-size: 11px; font-weight: 500; color: var(--text); }
+  .matrix-cell { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 22px; border-radius: 5px; font-family: "DM Mono", monospace; font-size: 11px; font-weight: 600; }
+  .mc-0 { color: var(--text-light); }
+  .mc-1 { background: #DBEAFE; color: #1E40AF; }
+  .mc-2 { background: #BFDBFE; color: #1E3A8A; }
+  .mc-3 { background: #93C5FD; color: #1E3A8A; }
+  .mc-5 { background: #3B82F6; color: #fff; }
+  .mc-high { background: var(--blue); color: #fff; }
+
+  /* AI BULLETIN */
+  .bulletin-card { background: linear-gradient(135deg, #0F2250 0%, #1B3A8C 100%); border-radius: var(--radius-lg); padding: 18px; color: #fff; }
+  .bulletin-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .bulletin-icon { width: 32px; height: 32px; background: rgba(255,255,255,0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .bulletin-title { font-size: 13px; font-weight: 600; }
+  .bulletin-sub { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 1px; }
+  .bulletin-body { font-size: 12px; color: rgba(255,255,255,0.8); line-height: 1.6; margin-bottom: 14px; }
+  .bulletin-actions { display: flex; gap: 8px; }
+  .bul-btn { padding: 6px 14px; border-radius: 7px; font-size: 11px; font-weight: 600; cursor: pointer; font-family: "DM Sans", sans-serif; border: none; transition: all 0.15s; }
+  .bul-btn.primary { background: #fff; color: var(--navy); }
+  .bul-btn.primary:hover { background: #EEF2FB; }
+  .bul-btn.secondary { background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.25); }
+  .bul-btn.secondary:hover { background: rgba(255,255,255,0.2); }
+
+  /* CONFIDENCE SCORE */
+  .conf-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .conf-row:last-child { border-bottom: none; }
+  .conf-label { font-size: 12px; font-weight: 500; color: var(--text); flex: 1; }
+  .conf-stars { display: flex; gap: 2px; }
+  .conf-star { width: 10px; height: 10px; border-radius: 50%; }
+  .cs-filled { background: var(--blue); }
+  .cs-empty { background: var(--border); }
+  .conf-pct { font-size: 11px; font-family: "DM Mono", monospace; color: var(--text-mid); min-width: 36px; text-align: right; }
+
+  /* BOTTOM GRID */
+  .bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+
+  /* TREND MINI */
+  .trend-row { display: flex; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+  .trend-row:last-child { border-bottom: none; }
+  .trend-label { font-size: 12px; font-weight: 500; color: var(--text); flex: 1; }
+  .trend-val { font-family: "DM Mono", monospace; font-size: 12px; color: var(--text-mid); min-width: 24px; text-align: right; }
+  .trend-delta { font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 4px; min-width: 44px; text-align: center; }
+  .td-up { color: var(--red); background: var(--red-pale); }
+  .td-dn { color: var(--green); background: var(--green-pale); }
+  .td-flat { color: var(--text-light); background: var(--bg); }
+
+  /* TAGS */
+  .new-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 9px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; background: #FEF3C7; color: #92400E; padding: 1px 5px; border-radius: 3px; margin-left: 5px; }
+
+  /* TOOLTIP */
+  .tip { position: relative; cursor: help; }
+  .tip:hover::after { content: attr(data-tip); position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%); background: var(--text); color: #fff; font-size: 10px; padding: 4px 8px; border-radius: 5px; white-space: nowrap; z-index: 100; pointer-events: none; }
+
+  /* ── TAXONOMY EXPLORER ── */
+  .tax-toggle-bar { display:flex; align-items:center; justify-content:space-between; padding:13px 18px; cursor:pointer; user-select:none; transition:background 0.12s; }
+  .tax-toggle-bar:hover { background:var(--bg); }
+  .tax-toggle-label { display:flex; align-items:center; gap:10px; }
+  .tax-toggle-label .ttl-icon { width:28px; height:28px; border-radius:7px; background:var(--blue-pale); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .tax-toggle-label .ttl-title { font-size:13px; font-weight:600; color:var(--text); }
+  .tax-toggle-label .ttl-sub { font-size:11px; color:var(--text-light); margin-top:1px; }
+  .tax-caret { width:16px; height:16px; color:var(--text-light); transition:transform 0.2s; }
+  .tax-caret.open { transform:rotate(180deg); }
+  .tax-body { display:none; border-top:1px solid var(--border); }
+  .tax-body.open { display:block; }
+
+  /* level description strip */
+  .level-strip { display:grid; grid-template-columns:repeat(4,1fr); gap:0; border-bottom:1px solid var(--border); }
+  .level-def { padding:14px 16px; border-right:1px solid var(--border); }
+  .level-def:last-child { border-right:none; }
+  .level-badge { display:inline-flex; align-items:center; justify-content:center; width:28px; height:22px; border-radius:5px; font-size:11px; font-weight:700; font-family:"DM Mono",monospace; margin-bottom:7px; }
+  .lb-1 { background:#EEF2FB; color:#1B3A8C; }
+  .lb-2 { background:#EEF2FB; color:#1B3A8C; }
+  .lb-3 { background:#ECFDF5; color:#059669; }
+  .lb-4 { background:#FEF2F2; color:#DC2626; }
+  .level-def .ld-name { font-size:12px; font-weight:600; color:var(--text); margin-bottom:3px; }
+  .level-def .ld-desc { font-size:11px; color:var(--text-mid); line-height:1.5; }
+  .level-def .ld-example { font-size:10px; color:var(--text-light); margin-top:5px; font-style:italic; }
+
+  /* taxonomy tree columns */
+  .tax-tree { display:grid; grid-template-columns:repeat(4,1fr); gap:0; }
+  .tax-col { border-right:1px solid var(--border); padding:14px 0; }
+  .tax-col:last-child { border-right:none; }
+  .tax-col-head { display:flex; align-items:center; gap:8px; padding:0 14px 10px; border-bottom:1px solid var(--border); margin-bottom:8px; }
+  .tax-col-head .level-badge { margin:0; }
+  .tax-col-head span { font-size:11px; font-weight:600; color:var(--text-mid); }
+
+  .tax-node { padding:6px 14px; display:flex; align-items:flex-start; gap:8px; cursor:default; transition:background 0.1s; }
+  .tax-node:hover { background:var(--bg); }
+  .tax-node-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; margin-top:4px; }
+  .tax-node-text { font-size:12px; color:var(--text); line-height:1.4; flex:1; }
+  .tax-node-text .tn-sub { font-size:10px; color:var(--text-light); margin-top:1px; }
+
+  /* L2 children sit under their L1 parent with indent */
+  .tax-l2-group { margin-bottom:12px; }
+  .tax-l2-parent { font-size:10px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; color:var(--text-light); padding:5px 14px 3px; }
+  .tax-l2-child { padding:5px 14px 5px 24px; display:flex; align-items:flex-start; gap:7px; transition:background 0.1s; cursor:default; }
+  .tax-l2-child:hover { background:var(--bg); }
+  .tax-l2-child .tl-dot { width:5px; height:5px; border-radius:50%; flex-shrink:0; margin-top:5px; opacity:0.6; }
+  .tax-l2-child .tl-text { font-size:11px; color:var(--text-mid); line-height:1.4; }
+
+  /* L3 / L4 items */
+  .tax-escalation { padding:6px 14px; display:flex; align-items:flex-start; gap:8px; }
+  .tax-escalation .te-icon { width:24px; height:24px; border-radius:6px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .tax-escalation .te-text { font-size:11px; color:var(--text); line-height:1.4; }
+  .tax-escalation .te-sub { font-size:10px; color:var(--text-light); margin-top:1px; }
+  .tax-divider { height:1px; background:var(--border); margin:10px 14px; }
+
+  /* summary row at bottom */
+  .tax-summary { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; padding:14px 18px; background:var(--bg); border-top:1px solid var(--border); }
+  .tax-sum-item { display:flex; flex-direction:column; gap:3px; }
+  .tax-sum-item .ts-label { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-light); }
+  .tax-sum-item .ts-val { font-size:18px; font-weight:600; font-family:"DM Mono",monospace; color:var(--text); }
+  .tax-sum-item .ts-sub { font-size:11px; color:var(--text-light); }
+
+
+  /* ── TAXONOMY DRILL-DOWN ── */
+  .tax-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; margin-bottom:14px; }
+  .tax-card-head { padding:14px 18px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
+  .tax-card-head .tch-icon { width:28px; height:28px; border-radius:7px; background:var(--blue-pale); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .tax-card-head .tch-title { font-size:13px; font-weight:600; color:var(--text); }
+  .tax-card-head .tch-sub { font-size:11px; color:var(--text-light); margin-top:1px; }
+  .tax-card-head .tch-hint { margin-left:auto; font-size:11px; color:var(--text-light); display:flex; align-items:center; gap:5px; }
+
+  /* breadcrumb */
+  .tax-breadcrumb { display:flex; align-items:center; gap:6px; padding:10px 18px; background:var(--bg); border-bottom:1px solid var(--border); flex-wrap:wrap; min-height:38px; }
+  .bc-item { font-size:11px; font-weight:500; padding:3px 10px; border-radius:5px; cursor:pointer; transition:all 0.12s; color:var(--text-mid); background:var(--card); border:1px solid var(--border); }
+  .bc-item:hover { border-color:var(--blue); color:var(--blue); }
+  .bc-item.active { background:var(--blue); color:#fff; border-color:var(--blue); }
+  .bc-item.root { color:var(--text-light); cursor:default; background:transparent; border-color:transparent; }
+  .bc-item.root:hover { color:var(--text-light); border-color:transparent; background:transparent; }
+  .bc-sep { color:var(--text-light); font-size:11px; }
+
+  /* 4-column cascade */
+  .tax-columns { display:grid; grid-template-columns:repeat(4,1fr); border-bottom:1px solid var(--border); }
+  .tax-col-wrap { border-right:1px solid var(--border); }
+  .tax-col-wrap:last-child { border-right:none; }
+  .tax-col-hdr { padding:10px 14px; background:var(--bg); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:7px; }
+  .lvl-badge { display:inline-flex; align-items:center; justify-content:center; width:24px; height:18px; border-radius:4px; font-size:10px; font-weight:700; font-family:"DM Mono",monospace; flex-shrink:0; }
+  .lb-1 { background:#EEF2FB; color:#1B3A8C; }
+  .lb-2 { background:#EEF2FB; color:#1B3A8C; }
+  .lb-3 { background:#ECFDF5; color:#059669; }
+  .lb-4 { background:#FEF2F2; color:#DC2626; }
+  .tax-col-hdr .lh-label { font-size:11px; font-weight:600; color:var(--text-mid); flex:1; }
+  .tax-col-hdr .lh-count { font-size:10px; font-family:"DM Mono",monospace; color:var(--text-light); }
+
+  .tax-list { min-height:240px; max-height:340px; overflow-y:auto; }
+  .tax-list::-webkit-scrollbar { width:3px; }
+  .tax-list::-webkit-scrollbar-thumb { background:var(--border-mid); border-radius:3px; }
+
+  .tax-item { display:flex; align-items:flex-start; gap:10px; padding:10px 14px; cursor:pointer; border-bottom:1px solid var(--border); transition:background 0.1s; position:relative; }
+  .tax-item:last-child { border-bottom:none; }
+  .tax-item:hover { background:var(--bg); }
+  .tax-item.selected { background:var(--blue-pale); border-left:3px solid var(--blue); padding-left:11px; }
+  .tax-item.selected .ti-name { color:var(--blue); font-weight:500; }
+  .ti-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-top:4px; }
+  .ti-icon { width:22px; height:22px; border-radius:5px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .ti-body { flex:1; min-width:0; }
+  .ti-name { font-size:12px; color:var(--text); line-height:1.4; }
+  .ti-meta { display:flex; align-items:center; gap:6px; margin-top:3px; }
+  .ti-count { font-size:10px; font-family:"DM Mono",monospace; color:var(--text-light); }
+  .ti-bar-wrap { flex:1; height:3px; background:var(--border); border-radius:2px; overflow:hidden; }
+  .ti-bar { height:100%; border-radius:2px; transition:width 0.3s ease; }
+  .ti-chevron { color:var(--text-light); flex-shrink:0; margin-top:2px; opacity:0.5; }
+  .ti-chevron.has-children { opacity:1; }
+
+  /* empty / NA states */
+  .tax-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:240px; padding:24px; text-align:center; }
+  .tax-empty svg { width:28px; height:28px; color:var(--text-light); opacity:0.3; margin-bottom:8px; }
+  .tax-empty .te-msg { font-size:12px; color:var(--text-light); line-height:1.5; }
+  .tax-empty .te-hint { font-size:11px; color:var(--text-light); margin-top:6px; opacity:0.7; }
+  .tax-na { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:240px; padding:24px; text-align:center; }
+  .tax-na .tna-badge { font-size:11px; font-weight:600; padding:4px 12px; border-radius:5px; background:var(--green-pale); color:var(--green); margin-bottom:10px; }
+  .tax-na .tna-msg { font-size:12px; color:var(--text-mid); line-height:1.6; }
+
+  /* detail panel */
+  .tax-detail { border-top:1px solid var(--border); padding:14px 18px; display:none; }
+  .tax-detail.visible { display:block; }
+  .td-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:12px; }
+  .td-stat { background:var(--bg); border-radius:8px; padding:10px 12px; }
+  .td-stat .ds-label { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-light); margin-bottom:4px; }
+  .td-stat .ds-val { font-size:18px; font-weight:600; font-family:"DM Mono",monospace; color:var(--text); }
+  .td-stat .ds-sub { font-size:11px; color:var(--text-light); margin-top:2px; }
+  .td-desc { font-size:12px; color:var(--text-mid); line-height:1.7; }
+  .td-tags { display:flex; flex-wrap:wrap; gap:5px; margin-top:10px; }
+  .td-tag { font-size:10px; padding:3px 8px; border-radius:4px; font-weight:500; border:1px solid var(--border); color:var(--text-mid); background:var(--card); }
+  .td-tag.green { background:var(--green-pale); color:var(--green); border-color:transparent; }
+  .td-tag.red { background:var(--red-pale); color:var(--red); border-color:transparent; }
+  .td-tag.blue { background:var(--blue-pale); color:var(--blue); border-color:transparent; }
+  .td-tag.amber { background:var(--amber-pale); color:var(--amber); border-color:transparent; }
+
+  @keyframes fadeSlide { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+  .tax-item { animation: fadeSlide 0.15s ease both; }
+
+
+  .l1-sub-counts { display:flex; align-items:center; gap:5px; flex-shrink:0; }
+  .lsc { display:inline-flex; align-items:center; gap:3px; font-size:10px; font-weight:600;
+         padding:2px 8px; border-radius:4px; border:1px solid; white-space:nowrap; }
+  .lsc-2 { background:#EEF2FB; color:#1B3A8C; border-color:#C0CEEE; }
+  .lsc-3 { background:#ECFDF5; color:#059669; border-color:#A7F3D0; }
+  .lsc-4 { background:#FEF2F2; color:#DC2626; border-color:#FECACA; }
+
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-wrap"><img src="appasamy-logo.png" alt="Appasamy Associates" style="width:140px;display:block;" /></div>
+    <div class="sub">Service Excellence Platform</div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Analytics</div>
+    <a class="nav-item" href="appasamy-service-excellence.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </a>
+    <a class="nav-item active" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      Root Causes
+      <span class="nav-badge">79</span>
+    </a>
+    <a class="nav-item" href="appasamy-trends.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      Trend Analysis
+      <span class="new-badge">New</span>
+    </a>
+    <a class="nav-item" href="appasamy-service-excellence.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      Technicians
+      <span class="new-badge">New</span>
+    </a>
+    <a class="nav-item" href="appasamy-service-excellence.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/></svg>
+      Equipment Health
+      <span class="new-badge">New</span>
+    </a>
+    <a class="nav-item" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Alerts
+      <span class="nav-badge alert">3</span>
+    </a>
+  </div>
+  <div class="sidebar-section" style="margin-top:4px;">
+    <div class="sidebar-section-label">Equipment</div>
+  </div>
+  <div style="padding:0 12px;">
+    <div class="equip-item active"><div class="equip-dot" style="background:#3B82F6;"></div> YAG Laser <span class="equip-count">87</span></div>
+    <div class="equip-item"><div class="equip-dot" style="background:#10B981;"></div> B-Scan <span class="equip-count">63</span></div>
+    <div class="equip-item"><div class="equip-dot" style="background:#F59E0B;"></div> Green Laser <span class="equip-count">41</span></div>
+    <div class="equip-item"><div class="equip-dot" style="background:#8B5CF6;"></div> Phaco System <span class="equip-count">38</span></div>
+    <div class="equip-item"><div class="equip-dot" style="background:#EF4444;"></div> Slit Lamp <span class="equip-count">29</span></div>
+    <div class="equip-item"><div class="equip-dot" style="background:#06B6D4;"></div> Tonometer <span class="equip-count">22</span></div>
+  </div>
+  <div class="sidebar-footer">
+    <div class="avatar">MB</div>
+    <div style="flex:1;min-width:0;">
+      <div class="avatar-name">Muthu Balakrishnan</div>
+      <div class="avatar-role">Service Manager</div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div>
+      <div class="topbar-breadcrumb">Analytics / YAG Laser / <span>Root Causes</span></div>
+      <div class="topbar-title">YAG Laser — Root Cause Analysis</div>
+    </div>
+    <div class="topbar-search">
+      <div class="search-wrap">
+        <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="globalSearch" class="search-input" placeholder="Search root causes, diagnosis codes&#x2026;" oninput="handleSearch(this.value)" onfocus="showDropdown()" onblur="setTimeout(hideDropdown,180)" autocomplete="off" />
+        <kbd class="search-kbd">&#x2318;K</kbd>
+      </div>
+      <div class="search-dropdown" id="searchDropdown">
+        <div class="sd-section-label">Root cause categories</div>
+        <div id="sdRC"></div>
+        <div class="sd-section-label" style="margin-top:6px;">Diagnosis codes</div>
+        <div id="sdCodes"></div>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <a class="btn-sm" href="appasamy-service-excellence.html">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to Dashboard
+      </a>
+      <button class="btn-sm primary">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Export Analysis
+      </button>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <span class="filter-label">Quick filters:</span>
+    <div class="pill">Last 7 days</div>
+    <div class="pill active">Last 30 days</div>
+    <div class="pill">Last 90 days</div>
+    <div class="filter-sep"></div>
+    <div class="date-range">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      28/04/2026 &rarr; 28/05/2026
+    </div>
+    <div class="date-range" style="margin-left:6px;">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      All Ages
+    </div>
+    <div class="ai-badge">
+      <div class="ai-dot"></div>
+      AI classification &middot; Last run 28/05 02:01 &middot; GPT-4o
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- PROGRESS STRIP -->
+    <div class="progress-strip">
+      <div class="prog-card">
+        <div class="pl">Closed tickets</div>
+        <div class="pv">80</div>
+        <div class="ps">YAG Laser &middot; last 30 days</div>
+      </div>
+      <div class="prog-card">
+        <div class="pl">Analysed by AI</div>
+        <div class="pv" style="color:var(--green);">79</div>
+        <div class="ps">98.8% complete</div>
+      </div>
+      <div class="prog-card">
+        <div class="pl">Pending</div>
+        <div class="pv" style="color:var(--amber);">1</div>
+        <div class="ps">Awaiting next run &middot; 02:00</div>
+      </div>
+      <div class="prog-bar-card">
+        <div class="prog-bar-label">
+          <span>Analysis coverage</span>
+          <span class="pct" id="progPct">0%</span>
+        </div>
+        <div class="prog-bg"><div class="prog-fill" id="progFill"></div></div>
+        <div class="prog-sub">
+          <span>79 analysed</span>
+          <span>1 remaining</span>
+        </div>
+      </div>
+    </div>
+
+
+    
+    <!-- CLASSIFICATION TAXONOMY DRILL-DOWN -->
+    <div class="section-hd" style="margin-bottom:10px;">
+      <div class="s-title">Classification framework — click to explore L1 → L2 → L3 → L4</div>
+      <div class="s-line"></div>
+    </div>
+
+    <div class="tax-card">
+      <div class="tax-card-head">
+        <div class="tch-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1B3A8C" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </div>
+        <div>
+          <div class="tch-title">Root cause classification taxonomy</div>
+          <div class="tch-sub">4-level hierarchy · select any item to drill down and see what sits beneath it</div>
+        </div>
+        <div class="tch-hint">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+          Click any row to explore its children
+        </div>
+      </div>
+
+      <!-- breadcrumb -->
+      <div class="tax-breadcrumb" id="taxBreadcrumb">
+        <span class="bc-item root">Classification</span>
+        <span class="bc-sep" id="bc2sep" style="display:none;">›</span>
+        <span class="bc-item" id="bc2" style="display:none;" onclick="bcNav(2)"></span>
+        <span class="bc-sep" id="bc3sep" style="display:none;">›</span>
+        <span class="bc-item" id="bc3" style="display:none;" onclick="bcNav(3)"></span>
+        <span class="bc-sep" id="bc4sep" style="display:none;">›</span>
+        <span class="bc-item" id="bc4" style="display:none;" onclick="bcNav(4)"></span>
+      </div>
+
+      <!-- 4 columns -->
+      <div class="tax-columns">
+        <!-- L1 -->
+        <div class="tax-col-wrap">
+          <div class="tax-col-hdr">
+            <div class="lvl-badge lb-1">L1</div>
+            <div class="lh-label">Category</div>
+            <div class="lh-count" id="l1count">5 items</div>
+          </div>
+          <div class="tax-list" id="l1list"></div>
+        </div>
+        <!-- L2 -->
+        <div class="tax-col-wrap">
+          <div class="tax-col-hdr">
+            <div class="lvl-badge lb-2">L2</div>
+            <div class="lh-label">Mechanism</div>
+            <div class="lh-count" id="l2count">—</div>
+          </div>
+          <div class="tax-list" id="l2list">
+            <div class="tax-empty">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/></svg>
+              <div class="te-msg">Select an L1 category</div>
+              <div class="te-hint">to see its mechanisms</div>
+            </div>
+          </div>
+        </div>
+        <!-- L3 -->
+        <div class="tax-col-wrap">
+          <div class="tax-col-hdr">
+            <div class="lvl-badge lb-3">L3</div>
+            <div class="lh-label">Field resolution</div>
+            <div class="lh-count" id="l3count">—</div>
+          </div>
+          <div class="tax-list" id="l3list">
+            <div class="tax-empty">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+              <div class="te-msg">Select an L2 mechanism</div>
+              <div class="te-hint">to see field resolutions</div>
+            </div>
+          </div>
+        </div>
+        <!-- L4 -->
+        <div class="tax-col-wrap">
+          <div class="tax-col-hdr">
+            <div class="lvl-badge lb-4">L4</div>
+            <div class="lh-label">Depot escalation</div>
+            <div class="lh-count" id="l4count">—</div>
+          </div>
+          <div class="tax-list" id="l4list">
+            <div class="tax-empty">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-4 0v2M12 12v4M10 14h4"/></svg>
+              <div class="te-msg">Select an L3 resolution</div>
+              <div class="te-hint">to see depot escalations</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- detail panel -->
+      <div class="tax-detail" id="taxDetail"></div>
+    </div>
+
+    <!-- ROOT CAUSE HIERARCHY + RIGHT PANEL -->
+    <div class="section-hd">
+      <div class="s-title">Hierarchical root cause analysis &mdash; expand any category to drill down</div>
+      <div class="s-line"></div>
+    </div>
+
+    <div class="rc-layout">
+      <!-- L1 ACCORDION -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-head-icon" style="background:var(--purple-pale);">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+          </div>
+          <div>
+            <div class="card-title">L1 &rarr; L4 root cause breakdown</div>
+            <div class="card-sub">79 tickets &middot; AI classified &middot; click any row to expand</div>
+          </div>
+          <div class="card-action" onclick="expandAll()">Expand all</div>
+        </div>
+
+        <!-- L1: CALIBRATION -->
+        <div class="l1-item" id="l1-cal">
+          <div class="l1-header" onclick="toggleL1('cal')">
+            <svg class="l1-chevron" id="chev-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            <div class="l1-dot" style="background:#1B3A8C;"></div>
+            <div class="l1-name">Calibration / Settings</div>
+            <div class="l1-sub-counts"><span class="lsc lsc-2">L2 &nbsp;2</span><span class="lsc lsc-3">L3 &nbsp;5</span></div>
+            <div class="l1-bar"><div class="l1-fill" style="width:100%;background:#1B3A8C;"></div></div>
+            <div class="l1-count">35</div>
+            <div class="l1-pct">44.3%</div>
+          </div>
+          <div class="l1-body" id="body-cal">
+            <div class="l2-item">
+              <div class="l2-header" onclick="toggleL2('cal-align')">
+                <svg class="l2-chevron" id="chev-cal-align" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                <div class="l2-name">Aiming beam misalignment</div>
+                <div class="l2-count">26 cases</div>
+                <div class="l2-pct">33.0%</div>
+              </div>
+              <div class="l2-body" id="body-cal-align">
+                <div class="l2-sample"><strong>Sample finding:</strong> "Aiming beam misalignment necessitated adjustment to realign the beam. This involved calibrating the optics components or adjusting the alignment settings within the laser system to ensure proper centring of the aiming beam. Technician used alignment tools to check and adjust beam path settings."</div>
+                <div class="l3-tags">
+                  <div class="l3-tag">Field calibration only <span class="l3-n">18</span></div>
+                  <div class="l3-tag">Depot-level realignment <span class="l3-n">6</span></div>
+                  <div class="l3-tag">Software offset reset <span class="l3-n">2</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="l2-item">
+              <div class="l2-header" onclick="toggleL2('cal-energy')">
+                <svg class="l2-chevron" id="chev-cal-energy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                <div class="l2-name">Energy output calibration drift</div>
+                <div class="l2-count">9 cases</div>
+                <div class="l2-pct">11.4%</div>
+              </div>
+              <div class="l2-body" id="body-cal-energy">
+                <div class="l2-sample"><strong>Sample finding:</strong> "Power output inconsistency required energy level recalibration. Technician verified laser power output against reference values and adjusted the calibration settings to restore correct energy delivery."</div>
+                <div class="l3-tags">
+                  <div class="l3-tag">Power meter recalibration <span class="l3-n">6</span></div>
+                  <div class="l3-tag">Component replacement (attenuator) <span class="l3-n">3</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- L1: PREVENTIVE MAINTENANCE -->
+        <div class="l1-item" id="l1-pm">
+          <div class="l1-header" onclick="toggleL1('pm')">
+            <svg class="l1-chevron" id="chev-pm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            <div class="l1-dot" style="background:#0D9488;"></div>
+            <div class="l1-name">Preventive Maintenance</div>
+            <div class="l1-sub-counts"><span class="lsc lsc-2">L2 &nbsp;2</span><span class="lsc lsc-3">L3 &nbsp;4</span></div>
+            <div class="l1-bar"><div class="l1-fill" style="width:23%;background:#0D9488;"></div></div>
+            <div class="l1-count">8</div>
+            <div class="l1-pct">10.1%</div>
+          </div>
+          <div class="l1-body" id="body-pm">
+            <div class="l2-item">
+              <div class="l2-header" onclick="toggleL2('pm-dust')">
+                <svg class="l2-chevron" id="chev-pm-dust" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                <div class="l2-name">Dust / fungus accumulation</div>
+                <div class="l2-count">5 cases</div>
+                <div class="l2-pct">6.3%</div>
+              </div>
+              <div class="l2-body" id="body-pm-dust">
+                <div class="l2-sample"><strong>Sample finding:</strong> "Dust and fungus accumulation led to motorised table up/down problems. Conducted thorough cleaning and removal of dust and fungus from sensitive areas to prevent mechanical binding and ensure smooth operation."</div>
+                <div class="l3-tags">
+                  <div class="l3-tag">Monitor/display cleaning <span class="l3-n">3</span></div>
+                  <div class="l3-tag">Optical path cleaning <span class="l3-n">2</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="l2-item">
+              <div class="l2-header" onclick="toggleL2('pm-shot')">
+                <svg class="l2-chevron" id="chev-pm-shot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                <div class="l2-name">25,000-shot scheduled reset</div>
+                <div class="l2-count">3 cases</div>
+                <div class="l2-pct">3.8%</div>
+              </div>
+              <div class="l2-body" id="body-pm-shot">
+                <div class="l2-sample"><strong>Sample finding:</strong> "Routine 25,000-shot maintenance: calibration reset and optical inspection completed. No component failure — scheduled service protocol."</div>
+                <div class="l3-tags">
+                  <div class="l3-tag">Counter reset only <span class="l3-n">2</span></div>
+                  <div class="l3-tag">Counter reset + optical check <span class="l3-n">1</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- L1: HARDWARE FAILURE -->
+        <div class="l1-item" id="l1-hw">
+          <div class="l1-header" onclick="toggleL1('hw')">
+            <svg class="l1-chevron" id="chev-hw" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            <div class="l1-dot" style="background:#DC2626;"></div>
+            <div class="l1-name">Hardware / Component Failure</div>
+            <div class="l1-sub-counts"><span class="lsc lsc-2">L2 &nbsp;2</span><span class="lsc lsc-3">L3 &nbsp;5</span></div>
+            <div class="l1-bar"><div class="l1-fill" style="width:29%;background:#DC2626;"></div></div>
+            <div class="l1-count">23</div>
+            <div class="l1-pct">29.1%</div>
+          </div>
+          <div class="l1-body" id="body-hw">
+            <div class="l2-item">
+              <div class="l2-header" onclick="toggleL2('hw-mech')">
+                <svg class="l2-chevron" id="chev-hw-mech" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                <div class="l2-name">Mechanical wear (rails, joystick, knobs)</div>
+                <div class="l2-count">13 cases</div>
+                <div class="l2-pct">16.5%</div>
+              </div>
+              <div class="l2-body" id="body-hw-mech">
+                <div class="l2-sample"><strong>Sample finding:</strong> "Base rail rack binding caused by worn glide pads. Joystick trigger spring fatigue identified on 3 units. Parts replaced in field; 2 cases referred to depot for rail assembly overhaul."</div>
+                <div class="l3-tags">
+                  <div class="l3-tag">Field part replacement <span class="l3-n">8</span></div>
+                  <div class="l3-tag">Depot repair (L4) <span class="l3-n">5</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="l2-item">
+              <div class="l2-header" onclick="toggleL2('hw-elec')">
+                <svg class="l2-chevron" id="chev-hw-elec" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                <div class="l2-name">Electronic / board failure (E1, YAG board)</div>
+                <div class="l2-count">10 cases</div>
+                <div class="l2-pct">12.7%</div>
+              </div>
+              <div class="l2-body" id="body-hw-elec">
+                <div class="l2-sample"><strong>Sample finding:</strong> "E1 error code triggered by YAG board fault. Board replaced at depot. Firmware re-flashed post-replacement. Unit tested with 50-shot burn-in protocol before return."</div>
+                <div class="l3-tags">
+                  <div class="l3-tag">Board replacement (depot) <span class="l3-n">7</span></div>
+                  <div class="l3-tag">Firmware reflash only <span class="l3-n">2</span></div>
+                  <div class="l3-tag">Field swap (stock unit) <span class="l3-n">1</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- L1: USER TRAINING -->
+        <div class="l1-item" id="l1-ut">
+          <div class="l1-header" onclick="toggleL1('ut')">
+            <svg class="l1-chevron" id="chev-ut" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            <div class="l1-dot" style="background:#D97706;"></div>
+            <div class="l1-name">User Training / Operator Error</div>
+            <div class="l1-sub-counts"><span class="lsc lsc-2">L2 &nbsp;1</span><span class="lsc lsc-3">L3 &nbsp;2</span></div>
+            <div class="l1-bar"><div class="l1-fill" style="width:6%;background:#D97706;"></div></div>
+            <div class="l1-count">2</div>
+            <div class="l1-pct">2.5%</div>
+          </div>
+          <div class="l1-body" id="body-ut">
+            <div class="l2-item">
+              <div class="l2-header" onclick="toggleL2('ut-demo')">
+                <svg class="l2-chevron" id="chev-ut-demo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                <div class="l2-name">Installation demo / familiarisation visit</div>
+                <div class="l2-count">2 cases</div>
+                <div class="l2-pct">2.5%</div>
+              </div>
+              <div class="l2-body" id="body-ut-demo">
+                <div class="l2-sample"><strong>Sample finding:</strong> "Installation demo indicates user training or familiarisation was the main activity. This could involve demonstrating control systems such as how to use the joy stick for operation. No equipment failure impact."</div>
+                <div class="l3-tags">
+                  <div class="l3-tag">Joystick operation demo <span class="l3-n">1</span></div>
+                  <div class="l3-tag">Full system walkthrough <span class="l3-n">1</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- L1: NO FAULT FOUND -->
+        <div class="l1-item" id="l1-nff">
+          <div class="l1-header" onclick="toggleL1('nff')">
+            <svg class="l1-chevron" id="chev-nff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            <div class="l1-dot" style="background:#94A3B8;"></div>
+            <div class="l1-name">No Fault Found (NFF)</div>
+            <div class="l1-sub-counts"><span class="lsc lsc-2">L2 &nbsp;1</span><span class="lsc lsc-3">L3 &nbsp;1</span></div>
+            <div class="l1-bar"><div class="l1-fill" style="width:3%;background:#94A3B8;"></div></div>
+            <div class="l1-count">1</div>
+            <div class="l1-pct">1.3%</div>
+          </div>
+          <div class="l1-body" id="body-nff">
+            <div class="l2-sample" style="margin:10px 0 6px;">"Power issue was reported but upon inspection, energy levels were stable and no fault was found in the power system or its components." <strong>Likely operator report; recommend follow-up call at 7 days.</strong></div>
+            <div class="l3-tags">
+              <div class="l3-tag">No action required <span class="l3-n">1</span></div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end accordion card -->
+
+      <!-- RIGHT COLUMN -->
+      <div class="right-stack">
+
+        <!-- BULLETIN GENERATOR -->
+        <div class="bulletin-card">
+          <div class="bulletin-head">
+            <div class="bulletin-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+            <div>
+              <div class="bulletin-title">AI service bulletin ready</div>
+              <div class="bulletin-sub">Generated from this month&rsquo;s calibration cluster</div>
+            </div>
+          </div>
+          <div class="bulletin-body">35 calibration cases this month (44% of total) — predominantly new installations (&lt;1yr). AI has drafted a preventive advisory: <em>"Recommended 90-day post-installation calibration check for all YAG Laser units commissioned after Jan 2026."</em></div>
+          <div class="bulletin-actions">
+            <button class="bul-btn primary">Approve &amp; send</button>
+            <button class="bul-btn secondary">Edit draft</button>
+            <button class="bul-btn secondary">Dismiss</button>
+          </div>
+        </div>
+
+        <!-- AI CONFIDENCE SCORES -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-head-icon" style="background:var(--purple-pale);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            </div>
+            <div>
+              <div class="card-title">AI classification confidence</div>
+              <div class="card-sub">Average confidence by L1 category</div>
+            </div>
+          </div>
+          <div style="padding:12px 18px;">
+            <div class="conf-row">
+              <div class="conf-label">Calibration / Settings</div>
+              <div class="conf-stars">
+                <div class="conf-star cs-filled"></div><div class="conf-star cs-filled"></div><div class="conf-star cs-filled"></div><div class="conf-star cs-filled"></div><div class="conf-star cs-filled"></div>
+              </div>
+              <div class="conf-pct">94%</div>
+            </div>
+            <div class="conf-row">
+              <div class="conf-label">Hardware / Component</div>
+              <div class="conf-stars">
+                <div class="conf-star cs-filled"></div><div class="conf-star cs-filled"></div><div class="conf-star cs-filled"></div><div class="conf-star cs-filled"></div><div class="conf-star cs-empty"></div>
+              </div>
+              <div class="conf-pct">87%</div>
+            </div>
+            <div class="conf-row">
+              <div class="conf-label">Preventive Maintenance</div>
+              <div class="conf-stars">
+                <div class="conf-star cs-filled"></div><div class="conf-star cs-filled"></div><div class="conf-star cs-filled"></div><div class="conf-star cs-filled"></div><div class="conf-star cs-empty"></div>
+              </div>
+              <div class="conf-pct">91%</div>
+            </div>
+            <div class="conf-row">
+              <div class="conf-label">User Training / Error</div>
+              <div class="conf-stars">
+                <div class="conf-star cs-filled"></div><div class="conf-star cs-filled"></div><div class="conf-star cs-filled"></div><div class="conf-star cs-empty"></div><div class="conf-star cs-empty"></div>
+              </div>
+              <div class="conf-pct">72%</div>
+            </div>
+            <div class="conf-row">
+              <div class="conf-label">No Fault Found</div>
+              <div class="conf-stars">
+                <div class="conf-star cs-filled"></div><div class="conf-star cs-filled"></div><div class="conf-star cs-filled"></div><div class="conf-star cs-empty"></div><div class="conf-star cs-empty"></div>
+              </div>
+              <div class="conf-pct">68%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TREND vs PREV MONTH -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-head-icon" style="background:#ECFDF5;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <div>
+              <div class="card-title">Root cause trends</div>
+              <div class="card-sub">vs previous 30-day period</div>
+            </div>
+          </div>
+          <div style="padding:10px 18px;">
+            <div class="trend-row">
+              <div class="trend-label">Calibration / Settings</div>
+              <div class="trend-val">35</div>
+              <div class="trend-delta td-up">&#x2191; +8</div>
+            </div>
+            <div class="trend-row">
+              <div class="trend-label">Hardware failure</div>
+              <div class="trend-val">23</div>
+              <div class="trend-delta td-up">&#x2191; +3</div>
+            </div>
+            <div class="trend-row">
+              <div class="trend-label">Preventive maintenance</div>
+              <div class="trend-val">8</div>
+              <div class="trend-delta td-dn">&#x2193; &minus;2</div>
+            </div>
+            <div class="trend-row">
+              <div class="trend-label">User training / error</div>
+              <div class="trend-val">2</div>
+              <div class="trend-delta td-flat">&mdash; 0</div>
+            </div>
+            <div class="trend-row">
+              <div class="trend-label">No fault found</div>
+              <div class="trend-val">1</div>
+              <div class="trend-delta td-dn">&#x2193; &minus;1</div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- right-stack -->
+    </div><!-- rc-layout -->
+
+    <!-- BOTTOM: AGE MATRIX -->
+    <div class="section-hd">
+      <div class="s-title">Equipment age analysis matrix &mdash; L3 &amp; L4 repair escalations only</div>
+      <div class="s-line"></div>
+    </div>
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-head">
+        <div class="card-head-icon" style="background:var(--blue-pale);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1B3A8C" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+        </div>
+        <div>
+          <div class="card-title">Age &times; escalation level matrix</div>
+          <div class="card-sub">Cases requiring L3 field part replacement or L4 depot repair, broken down by device age</div>
+        </div>
+      </div>
+      <div style="padding:14px 18px;overflow-x:auto;">
+        <table class="matrix-table">
+          <thead>
+            <tr>
+              <th style="min-width:180px;">Level</th>
+              <th>&lt;1 Year</th>
+              <th>1&ndash;2 Yr</th>
+              <th>2&ndash;4 Yr</th>
+              <th>4&ndash;7 Yr</th>
+              <th>7+ Yr</th>
+              <th>Unknown</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="row-label">L3 &mdash; Field part replacement</td>
+              <td><span class="matrix-cell mc-5">5</span></td>
+              <td><span class="matrix-cell mc-0">0</span></td>
+              <td><span class="matrix-cell mc-0">0</span></td>
+              <td><span class="matrix-cell mc-1">1</span></td>
+              <td><span class="matrix-cell mc-0">0</span></td>
+              <td><span class="matrix-cell mc-0">0</span></td>
+              <td><span class="matrix-cell mc-high">6</span></td>
+            </tr>
+            <tr>
+              <td class="row-label">L4 &mdash; Depot repair</td>
+              <td><span class="matrix-cell mc-3">3</span></td>
+              <td><span class="matrix-cell mc-0">0</span></td>
+              <td><span class="matrix-cell mc-1">1</span></td>
+              <td><span class="matrix-cell mc-1">1</span></td>
+              <td><span class="matrix-cell mc-0">0</span></td>
+              <td><span class="matrix-cell mc-0">0</span></td>
+              <td><span class="matrix-cell mc-high">5</span></td>
+            </tr>
+            <tr>
+              <td class="row-label" style="color:var(--text-light);">L1 + L2 &mdash; Field resolved</td>
+              <td><span class="matrix-cell" style="color:var(--text-light);font-size:11px;">37</span></td>
+              <td><span class="matrix-cell" style="color:var(--text-light);font-size:11px;">4</span></td>
+              <td><span class="matrix-cell" style="color:var(--text-light);font-size:11px;">13</span></td>
+              <td><span class="matrix-cell" style="color:var(--text-light);font-size:11px;">10</span></td>
+              <td><span class="matrix-cell" style="color:var(--text-light);font-size:11px;">5</span></td>
+              <td><span class="matrix-cell" style="color:var(--text-light);font-size:11px;">0</span></td>
+              <td><span class="matrix-cell" style="color:var(--text-light);font-size:11px;">69</span></td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="margin-top:12px;font-size:11px;color:var(--text-light);padding:8px 10px;background:var(--amber-pale);border-radius:6px;border-left:3px solid var(--amber);">
+          &#x26A0; 8 of 11 escalated cases (L3+L4) came from devices under 1 year old. Strongly suggests post-installation quality gaps. Recommend 90-day depot-level inspection protocol for new installations.
+        </div>
+      </div>
+    </div>
+
+  </div><!-- content -->
+</main>
+
+<script>
+function toggleL1(id) {
+  const body = document.getElementById('body-' + id);
+  const chev = document.getElementById('chev-' + id);
+  const hdr  = chev.closest('.l1-header');
+  const open = body.classList.contains('open');
+  body.classList.toggle('open', !open);
+  chev.classList.toggle('open', !open);
+  hdr.classList.toggle('open', !open);
+}
+function toggleL2(id) {
+  const body = document.getElementById('body-' + id);
+  const chev = document.getElementById('chev-' + id);
+  const hdr  = chev.closest('.l2-header');
+  const open = body.classList.contains('open');
+  body.classList.toggle('open', !open);
+  chev.classList.toggle('open', !open);
+  hdr.classList.toggle('open', !open);
+}
+function expandAll() {
+  ['cal','pm','hw','ut','nff'].forEach(id => {
+    document.getElementById('body-' + id).classList.add('open');
+    document.getElementById('chev-' + id).classList.add('open');
+    const hdr = document.getElementById('chev-' + id).closest('.l1-header');
+    hdr.classList.add('open');
+  });
+  ['cal-align','cal-energy','pm-dust','pm-shot','hw-mech','hw-elec','ut-demo'].forEach(id => {
+    const b = document.getElementById('body-' + id);
+    const c = document.getElementById('chev-' + id);
+    if (b) b.classList.add('open');
+    if (c) c.classList.add('open');
+  });
+}
+
+// Animate progress bar on load
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('progFill').style.width = '98.8%';
+    document.getElementById('progPct').textContent = '98.8%';
+  }, 300);
+});
+
+// Search
+const rcData = [
+  {name:'Calibration / Settings',count:35},
+  {name:'Hardware / Component Failure',count:23},
+  {name:'Aiming beam misalignment',count:26},
+  {name:'Mechanical wear (rails, joystick)',count:13},
+  {name:'Electronic / board failure',count:10},
+  {name:'Energy output calibration drift',count:9},
+  {name:'Dust / fungus accumulation',count:5},
+  {name:'Preventive Maintenance',count:8},
+  {name:'User Training / Operator Error',count:2},
+  {name:'No Fault Found',count:1},
+];
+const codeData = [
+  {code:'L804',name:'Joystick trigger',n:14},
+  {code:'L107',name:'Aiming beam not centred',n:13},
+  {code:'L102',name:'Energy level problem',n:10},
+  {code:'L803',name:'Base movement rail rack',n:10},
+  {code:'L708',name:'E1 error',n:7},
+];
+function hl(t,q) {
+  if (!q) return t;
+  return t.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<mark class="search-highlight">$1</mark>');
+}
+function renderDropdown(q) {
+  const lq = q.toLowerCase();
+  const rcs = rcData.filter(r => !lq || r.name.toLowerCase().includes(lq));
+  const codes = codeData.filter(c => !lq || c.code.toLowerCase().includes(lq) || c.name.toLowerCase().includes(lq));
+  document.getElementById('sdRC').innerHTML = rcs.length
+    ? rcs.slice(0,5).map(r => `<div class="sd-item"><span class="sd-name">${hl(r.name,q)}</span><span class="sd-meta">${r.count} cases</span></div>`).join('')
+    : '<div style="padding:10px;font-size:11px;color:var(--text-light);text-align:center;">No results</div>';
+  document.getElementById('sdCodes').innerHTML = codes.length
+    ? codes.map(c => `<div class="sd-item"><span class="sd-code">${hl(c.code,q)}</span><span class="sd-name">${hl(c.name,q)}</span><span class="sd-meta">${c.n} cases</span></div>`).join('')
+    : '';
+}
+function showDropdown() { renderDropdown(document.getElementById('globalSearch').value); document.getElementById('searchDropdown').classList.add('open'); }
+function hideDropdown() { document.getElementById('searchDropdown').classList.remove('open'); }
+function handleSearch(v) { renderDropdown(v); showDropdown(); }
+document.addEventListener('keydown', e => {
+  if ((e.metaKey||e.ctrlKey) && e.key==='k') { e.preventDefault(); document.getElementById('globalSearch').focus(); showDropdown(); }
+  if (e.key==='Escape') { hideDropdown(); document.getElementById('globalSearch').blur(); }
+});
+
+
+
+// ── taxonomy data ──────────────────────────────────────────────────────────
+const TAX = {
+  l1: [
+    {
+      id:'cal', name:'Calibration / Settings', color:'#1B3A8C', cases:35, pct:44.3,
+      desc:'Any issue where optical, mechanical, or software settings have drifted from specification. Most common root cause category — primarily affects new installations.',
+      tags:['Most frequent','New installs','Field-resolvable','GPT-4o confidence: 94%'],
+      tagTypes:['amber','amber','green','blue'],
+      stats:[{l:'Cases this period',v:'35',s:'44.3% of total'},{l:'Avg resolution',v:'1.4d',s:'Faster than avg'},{l:'FTFR',v:'74%',s:'+6% above avg'}]
+    },
+    {
+      id:'hw', name:'Hardware / Component Failure', color:'#DC2626', cases:23, pct:29.1,
+      desc:'Physical component wear, electronic board faults, or mechanical failure requiring parts replacement or depot repair. Second largest category.',
+      tags:['Parts required','Some depot escalation','7+ yr devices high risk','GPT-4o confidence: 87%'],
+      tagTypes:['red','red','amber','blue'],
+      stats:[{l:'Cases this period',v:'23',s:'29.1% of total'},{l:'Avg resolution',v:'4.2d',s:'Above avg — parts wait'},{l:'FTFR',v:'61%',s:'Below target'}]
+    },
+    {
+      id:'pm', name:'Preventive Maintenance', color:'#0D9488', cases:8, pct:10.1,
+      desc:'Scheduled or triggered maintenance visits — cleaning, 25,000-shot resets, and optical inspections. These are expected visits, not failures.',
+      tags:['Scheduled','No equipment failure','Cleaning required','GPT-4o confidence: 91%'],
+      tagTypes:['green','green','green','blue'],
+      stats:[{l:'Cases this period',v:'8',s:'10.1% of total'},{l:'Avg resolution',v:'0.5d',s:'Fastest category'},{l:'FTFR',v:'100%',s:'Always first-visit'}]
+    },
+    {
+      id:'ut', name:'User Training / Operator Error', color:'#D97706', cases:2, pct:2.5,
+      desc:'Visits where the root cause was operator unfamiliarity or misuse rather than equipment failure. Typically post-installation familiarisation.',
+      tags:['No equipment fault','Training opportunity','Post-install','GPT-4o confidence: 72%'],
+      tagTypes:['amber','amber','amber','blue'],
+      stats:[{l:'Cases this period',v:'2',s:'2.5% of total'},{l:'Avg resolution',v:'0.3d',s:'Demo/walkthrough only'},{l:'FTFR',v:'100%',s:'No follow-up needed'}]
+    },
+    {
+      id:'nff', name:'No Fault Found (NFF)', color:'#94A3B8', cases:1, pct:1.3,
+      desc:'Cases where a fault was reported by the customer but could not be reproduced on inspection. May indicate intermittent issues or operator error.',
+      tags:['No action taken','Monitor for recurrence','7-day follow-up recommended','GPT-4o confidence: 68%'],
+      tagTypes:['','','amber','blue'],
+      stats:[{l:'Cases this period',v:'1',s:'1.3% of total'},{l:'Avg resolution',v:'0.5d',s:'Inspection only'},{l:'FTFR',v:'—',s:'Unresolvable by definition'}]
+    },
+  ],
+  l2: {
+    cal: [
+      { id:'cal-align', name:'Aiming beam misalignment', cases:26, pct:74,
+        desc:'Aiming beam has drifted from centre — most common L2 under calibration. Caused by vibration during transport, thermal expansion, or installation handling.',
+        tags:['Field-resolvable','Alignment tools required','Common in <1yr devices'],
+        tagTypes:['green','','amber'] },
+      { id:'cal-energy', name:'Energy output calibration drift', cases:9, pct:26,
+        desc:'Laser energy output deviates from target mJ levels. Requires power meter verification and adjustment of calibration coefficients.',
+        tags:['Power meter needed','Sometimes L3 escalation','Check attenuator'],
+        tagTypes:['','amber',''] }
+    ],
+    hw: [
+      { id:'hw-mech', name:'Mechanical wear — rails, joystick, knobs', cases:13, pct:57,
+        desc:'Physical wear on moving parts: base rail glide pads, joystick spring assemblies, aiming beam knobs. Parts replacement typically resolves at L3.',
+        tags:['Parts consumed','L3 or L4','Affects 2–7yr devices most'],
+        tagTypes:['red','red','amber'] },
+      { id:'hw-elec', name:'Electronic / board failure (E1, YAG board)', cases:10, pct:43,
+        desc:'Electronic failures including E1 error codes and YAG board faults. Typically requires depot-level bench repair (L4). Cannot be field-resolved.',
+        tags:['Depot required (L4)','Board replacement','7–14 day turnaround'],
+        tagTypes:['red','red','amber'] }
+    ],
+    pm: [
+      { id:'pm-dust', name:'Dust / fungus accumulation', cases:5, pct:63,
+        desc:'Dust and fungal growth in optical paths, motor assemblies, and display surfaces. Thorough cleaning restores operation. No parts required.',
+        tags:['Cleaning only','No parts','Preventable with covers'],
+        tagTypes:['green','green','amber'] },
+      { id:'pm-shot', name:'25,000-shot scheduled reset', cases:3, pct:37,
+        desc:'Routine counter reset and calibration check triggered at 25,000 shot threshold. Scheduled visit — no equipment failure.',
+        tags:['Scheduled','Counter reset','Optional optical check'],
+        tagTypes:['green','green','blue'] }
+    ],
+    ut: [
+      { id:'ut-demo', name:'Installation demo / familiarisation visit', cases:2, pct:100,
+        desc:'Technician visit for post-installation operator training. Demonstrates joystick controls, energy settings, and safety protocols. No fault present.',
+        tags:['Training visit','No repair','New customer'],
+        tagTypes:['green','green','blue'] }
+    ],
+    nff: [
+      { id:'nff-none', name:'No reproducible fault on inspection', cases:1, pct:100,
+        desc:'Customer reported an issue (energy instability) but full bench inspection found all parameters within spec. Advised monitoring and follow-up.',
+        tags:['Intermittent possible','7-day follow-up','No action taken'],
+        tagTypes:['amber','amber',''] }
+    ]
+  },
+  l3: {
+    'cal-align': [
+      { id:'cal-align-field', name:'Field calibration — alignment tools only', cases:18, pct:69,
+        desc:'Technician realigns aiming beam using optical alignment tools on-site. Resolved within the visit. Most common L3 outcome for this L2.',
+        tags:['No parts','30–60 min','FTFR: 88%'],
+        tagTypes:['green','','green'] },
+      { id:'cal-align-sw', name:'Software offset reset', cases:5, pct:19,
+        desc:'Alignment offset corrected via service menu software adjustment rather than physical realignment. Faster than mechanical methods.',
+        tags:['Software only','15 min','Service menu access required'],
+        tagTypes:['blue','','blue'] },
+      { id:'cal-align-depot', name:'Depot-level optical realignment', cases:3, pct:12,
+        desc:'Beam path misalignment severe enough to require depot bench tools for full optical overhaul. Field correction not sufficient.',
+        tags:['Escalates to L4','Unit collected','14-day TAT'],
+        tagTypes:['red','red','amber'] }
+    ],
+    'cal-energy': [
+      { id:'cal-energy-meter', name:'Power meter recalibration', cases:6, pct:67,
+        desc:'Energy levels recalibrated against a certified power meter. Coefficients updated in service menu. No parts required.',
+        tags:['Power meter required','Field-resolvable','No parts'],
+        tagTypes:['','green','green'] },
+      { id:'cal-energy-part', name:'Attenuator component replacement', cases:3, pct:33,
+        desc:'Energy output could not be corrected by calibration alone — attenuator component replaced in field to restore correct output range.',
+        tags:['Part consumed','Field replacement','Parts: attenuator'],
+        tagTypes:['red','green','red'] }
+    ],
+    'hw-mech': [
+      { id:'hw-mech-field', name:'Field part replacement', cases:8, pct:62,
+        desc:'Worn mechanical component replaced on-site by technician. Includes joystick spring assemblies, base rail glide pads, and knob assemblies.',
+        tags:['Parts consumed','Field resolved','Same-day'],
+        tagTypes:['red','green','green'] },
+      { id:'hw-mech-depot', name:'Escalated to depot — rail overhaul', cases:5, pct:38,
+        desc:'Base rail damage or wear beyond field replacement capability. Full rail assembly overhaul required at depot.',
+        tags:['Depot required (L4)','Unit collected','Complex assembly'],
+        tagTypes:['red','red',''] }
+    ],
+    'hw-elec': [
+      { id:'hw-elec-depot', name:'Direct depot escalation', cases:10, pct:100,
+        desc:'All electronic board failures escalate directly to L4 depot repair. No field-resolvable action available for E1 errors or YAG board faults.',
+        tags:['Always L4','No field fix possible','Bench diagnosis needed'],
+        tagTypes:['red','red',''] }
+    ],
+    'pm-dust': [
+      { id:'pm-dust-display', name:'Monitor and display surface cleaning', cases:3, pct:60,
+        desc:'Thorough cleaning of display surfaces and surrounding areas. Compressed air and approved solvent cleaning kit used.',
+        tags:['No parts','Cleaning kit only','30 min'],
+        tagTypes:['green','green',''] },
+      { id:'pm-dust-optical', name:'Optical path cleaning', cases:2, pct:40,
+        desc:'Dust or fungus removed from optical path components. Requires careful disassembly and use of optical-grade cleaning materials.',
+        tags:['Optical grade cleaning','60–90 min','No parts'],
+        tagTypes:['','','green'] }
+    ],
+    'pm-shot': [
+      { id:'pm-shot-counter', name:'Counter reset only', cases:2, pct:67,
+        desc:'25,000-shot counter reset via service menu. Quick procedure — unit verified and returned to service.',
+        tags:['10 min','No parts','Service menu'],
+        tagTypes:['green','green','blue'] },
+      { id:'pm-shot-full', name:'Counter reset + optical inspection', cases:1, pct:33,
+        desc:'Full optical inspection performed alongside counter reset. Recommended for units with prior calibration history.',
+        tags:['45 min','Comprehensive','Recommended for 2+ yr units'],
+        tagTypes:['','','amber'] }
+    ],
+    'ut-demo': [
+      { id:'ut-demo-joy', name:'Joystick operation demonstration', cases:1, pct:50,
+        desc:'Operator shown correct joystick technique and control system use. No equipment adjustment made.',
+        tags:['Training only','User guide left','No fault'],
+        tagTypes:['green','','green'] },
+      { id:'ut-demo-full', name:'Full system walkthrough', cases:1, pct:50,
+        desc:'Complete system demonstration covering all operational modes, safety features, and maintenance intervals.',
+        tags:['Full training','Documentation provided','New installation'],
+        tagTypes:['green','blue','green'] }
+    ],
+    'nff-none': null
+  },
+  l4: {
+    'cal-align-depot': [
+      { id:'l4-optical', name:'Full optical realignment — bench', cases:3, pct:100,
+        desc:'Complete optical path disassembly, component inspection, and precision bench realignment. Requires interferometric measurement equipment only available at depot.',
+        tags:['Depot only','10–14 working days','Full test post-repair'],
+        tagTypes:['red','amber','green'] }
+    ],
+    'hw-mech-depot': [
+      { id:'l4-rail', name:'Base rail assembly overhaul', cases:5, pct:100,
+        desc:'Full base rail assembly removed, worn glide pads and bearings replaced, rails re-shimmed to specification, and movement tested across full travel range.',
+        tags:['Complex assembly','7–10 working days','Parts: rail kit'],
+        tagTypes:['','amber','red'] }
+    ],
+    'hw-elec-depot': [
+      { id:'l4-board', name:'YAG board replacement', cases:7, pct:70,
+        desc:'Faulty YAG control board removed and replaced with new or refurbished board. Firmware re-flashed and full 50-shot burn-in test conducted before return.',
+        tags:['Board replacement','Firmware reflash','50-shot burn-in'],
+        tagTypes:['red','blue','green'] },
+      { id:'l4-fw', name:'Firmware reflash only', cases:2, pct:20,
+        desc:'E1 error resolved by firmware corruption fix — board hardware intact. Service tool connected and firmware re-imaged from depot server.',
+        tags:['Software fix','2 days TAT','No parts'],
+        tagTypes:['blue','green','green'] },
+      { id:'l4-field-swap', name:'Stock unit field swap', cases:1, pct:10,
+        desc:'Customer downtime risk too high to wait for depot repair — loan unit provided from depot stock while faulty unit undergoes full repair.',
+        tags:['Loan unit deployed','Customer priority','Full repair parallel'],
+        tagTypes:['amber','amber',''] }
+    ]
+  }
+};
+
+// ── state ──────────────────────────────────────────────────────────────────
+let sel = { l1:null, l2:null, l3:null };
+
+// ── render helpers ─────────────────────────────────────────────────────────
+function tagHtml(tags, types) {
+  return tags.map((t,i)=>{
+    const cls = types && types[i] ? types[i] : '';
+    return `<span class="td-tag ${cls}">${t}</span>`;
+  }).join('');
+}
+
+function renderL1() {
+  const max = Math.max(...TAX.l1.map(x=>x.cases));
+  document.getElementById('l1list').innerHTML = TAX.l1.map(n=>`
+    <div class="tax-item${sel.l1===n.id?' selected':''}" onclick="selectL1('${n.id}')">
+      <div class="ti-dot" style="background:${n.color};margin-top:5px;"></div>
+      <div class="ti-body">
+        <div class="ti-name">${n.name}</div>
+        <div class="ti-meta">
+          <span class="ti-count">${n.cases} cases</span>
+          <div class="ti-bar-wrap"><div class="ti-bar" style="width:${n.cases/max*100}%;background:${n.color};opacity:0.4;"></div></div>
+          <span class="ti-count">${n.pct}%</span>
+        </div>
+      </div>
+      <svg class="ti-chevron has-children" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>`).join('');
+  document.getElementById('l1count').textContent = TAX.l1.length + ' items';
+}
+
+function renderL2(l1id) {
+  const items = TAX.l2[l1id] || [];
+  if (!items.length) {
+    document.getElementById('l2list').innerHTML = `<div class="tax-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><div class="te-msg">No L2 mechanisms defined</div></div>`;
+    document.getElementById('l2count').textContent = '—';
+    return;
+  }
+  const max = Math.max(...items.map(x=>x.cases));
+  const l1 = TAX.l1.find(x=>x.id===l1id);
+  document.getElementById('l2list').innerHTML = items.map(n=>`
+    <div class="tax-item${sel.l2===n.id?' selected':''}" onclick="selectL2('${n.id}')">
+      <div class="ti-dot" style="background:${l1.color};opacity:0.6;margin-top:5px;"></div>
+      <div class="ti-body">
+        <div class="ti-name">${n.name}</div>
+        <div class="ti-meta">
+          <span class="ti-count">${n.cases} cases</span>
+          <div class="ti-bar-wrap"><div class="ti-bar" style="width:${n.cases/max*100}%;background:${l1.color};opacity:0.35;"></div></div>
+          <span class="ti-count">${n.pct}%</span>
+        </div>
+      </div>
+      <svg class="ti-chevron has-children" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>`).join('');
+  document.getElementById('l2count').textContent = items.length + ' items';
+}
+
+function renderL3(l2id) {
+  const items = TAX.l3[l2id];
+  if (!items || items === null) {
+    document.getElementById('l3list').innerHTML = `<div class="tax-na"><div class="tna-badge">✓ No further breakdown</div><div class="tna-msg">This mechanism has no field-level sub-classification. The action taken is recorded at L2.</div></div>`;
+    document.getElementById('l3list').innerHTML = `<div class="tax-na"><div class="tna-badge">✓ Not applicable</div><div class="tna-msg">No L3 sub-types for this mechanism. Resolution recorded at L2 level.</div></div>`;
+    document.getElementById('l3count').textContent = 'N/A';
+    return;
+  }
+  const max = Math.max(...items.map(x=>x.cases));
+  document.getElementById('l3list').innerHTML = items.map(n=>{
+    const hasL4 = TAX.l4[n.id] && TAX.l4[n.id].length;
+    return `<div class="tax-item${sel.l3===n.id?' selected':''}" onclick="selectL3('${n.id}')">
+      <div class="ti-icon" style="background:var(--green-pale);">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="ti-body">
+        <div class="ti-name">${n.name}</div>
+        <div class="ti-meta">
+          <span class="ti-count">${n.cases} cases</span>
+          <div class="ti-bar-wrap"><div class="ti-bar" style="width:${n.cases/max*100}%;background:#059669;opacity:0.4;"></div></div>
+          <span class="ti-count">${n.pct}%</span>
+        </div>
+      </div>
+      <svg class="ti-chevron ${hasL4?'has-children':''}" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>`;
+  }).join('');
+  document.getElementById('l3count').textContent = items.length + ' items';
+}
+
+function renderL4(l3id) {
+  const items = TAX.l4[l3id];
+  if (!items || !items.length) {
+    document.getElementById('l4list').innerHTML = `<div class="tax-na"><div class="tna-badge" style="background:var(--green-pale);color:var(--green);">✓ Field resolved — no depot</div><div class="tna-msg">This resolution path does not escalate to depot. Case is fully closed after the field visit.</div></div>`;
+    document.getElementById('l4count').textContent = 'N/A';
+    return;
+  }
+  const max = Math.max(...items.map(x=>x.cases));
+  document.getElementById('l4list').innerHTML = items.map(n=>`
+    <div class="tax-item">
+      <div class="ti-icon" style="background:var(--red-pale);">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-4 0v2"/></svg>
+      </div>
+      <div class="ti-body">
+        <div class="ti-name">${n.name}</div>
+        <div class="ti-meta">
+          <span class="ti-count">${n.cases} cases</span>
+          <div class="ti-bar-wrap"><div class="ti-bar" style="width:${n.cases/max*100}%;background:#DC2626;opacity:0.4;"></div></div>
+          <span class="ti-count">${n.pct}%</span>
+        </div>
+      </div>
+    </div>`).join('');
+  document.getElementById('l4count').textContent = items.length + ' items';
+}
+
+// ── selection handlers ─────────────────────────────────────────────────────
+function selectL1(id) {
+  sel = { l1:id, l2:null, l3:null };
+  renderL1();
+  renderL2(id);
+  clearCol('l3list','Select an L2 mechanism','to see field resolutions');
+  clearCol('l4list','Select an L3 resolution','to see depot escalations');
+  document.getElementById('l3count').textContent = '—';
+  document.getElementById('l4count').textContent = '—';
+  const n = TAX.l1.find(x=>x.id===id);
+  updateBreadcrumb(n.name, null, null);
+  showDetail(n, 'l1');
+}
+function selectL2(id) {
+  sel.l2 = id; sel.l3 = null;
+  renderL2(sel.l1);
+  renderL3(id);
+  clearCol('l4list','Select an L3 resolution','to see depot escalations');
+  document.getElementById('l4count').textContent = '—';
+  const l2list = TAX.l2[sel.l1];
+  const n = l2list.find(x=>x.id===id);
+  const l1n = TAX.l1.find(x=>x.id===sel.l1);
+  updateBreadcrumb(l1n.name, n.name, null);
+  showDetail(n, 'l2');
+}
+function selectL3(id) {
+  sel.l3 = id;
+  renderL3(sel.l2);
+  renderL4(id);
+  const l3items = TAX.l3[sel.l2];
+  const n = l3items.find(x=>x.id===id);
+  const l1n = TAX.l1.find(x=>x.id===sel.l1);
+  const l2list = TAX.l2[sel.l1];
+  const l2n = l2list.find(x=>x.id===sel.l2);
+  updateBreadcrumb(l1n.name, l2n.name, n.name);
+  showDetail(n, 'l3');
+}
+
+function clearCol(listId, msg, hint) {
+  document.getElementById(listId).innerHTML = `
+    <div class="tax-empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/></svg>
+      <div class="te-msg">${msg}</div>
+      <div class="te-hint">${hint}</div>
+    </div>`;
+}
+
+function updateBreadcrumb(l1, l2, l3) {
+  ['bc2','bc3','bc4','bc2sep','bc3sep','bc4sep'].forEach(id=>{
+    document.getElementById(id).style.display = 'none';
+  });
+  if (l1) {
+    document.getElementById('bc2').textContent = l1;
+    document.getElementById('bc2').style.display = 'inline-flex';
+    document.getElementById('bc2sep').style.display = 'inline';
+    document.getElementById('bc2').classList.toggle('active', !l2);
+  }
+  if (l2) {
+    document.getElementById('bc3').textContent = l2;
+    document.getElementById('bc3').style.display = 'inline-flex';
+    document.getElementById('bc3sep').style.display = 'inline';
+    document.getElementById('bc3').classList.toggle('active', !l3);
+    document.getElementById('bc2').classList.remove('active');
+  }
+  if (l3) {
+    document.getElementById('bc4').textContent = l3;
+    document.getElementById('bc4').style.display = 'inline-flex';
+    document.getElementById('bc4sep').style.display = 'inline';
+    document.getElementById('bc4').classList.add('active');
+    document.getElementById('bc3').classList.remove('active');
+  }
+}
+
+function bcNav(level) {
+  if (level === 2 && sel.l1) { sel.l2=null; sel.l3=null; selectL1(sel.l1); }
+  if (level === 3 && sel.l2) { sel.l3=null; selectL2(sel.l2); }
+}
+
+function showDetail(node, level) {
+  const detail = document.getElementById('taxDetail');
+  detail.classList.add('visible');
+  const statsHtml = (node.stats||[]).map(s=>`
+    <div class="td-stat">
+      <div class="ds-label">${s.l}</div>
+      <div class="ds-val">${s.v}</div>
+      <div class="ds-sub">${s.s}</div>
+    </div>`).join('');
+  const levelLabel = {l1:'L1 category',l2:'L2 mechanism',l3:'L3 field resolution'}[level];
+  detail.innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+      <span style="font-size:10px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--text-light);">${levelLabel}</span>
+      <span style="font-size:13px;font-weight:600;color:var(--text);">${node.name}</span>
+    </div>
+    ${statsHtml ? `<div class="td-grid">${statsHtml}</div>` : ''}
+    <div class="td-desc">${node.desc}</div>
+    <div class="td-tags">${tagHtml(node.tags||[], node.tagTypes||[])}</div>`;
+}
+
+// ── init ───────────────────────────────────────────────────────────────────
+renderL1();
+
+</script>
+</body>
+</html>

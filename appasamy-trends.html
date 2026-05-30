@@ -1,0 +1,1911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trend Analysis — Appasamy Service Excellence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js">
+// ── CUSTOMER DATA ─────────────────────────────────────────────────────────────
+const CUSTOMERS = [
+  {
+    id:'shankar', name:'Shankar Eye Hospital', city:'Chennai',
+    initials:'SH', avatarColor:'#1B3A8C',
+    productCount:4, products:['YAG Laser','B-Scan','Green Laser','Phaco System'],
+    monthly:[8,11,13,15,18], totalCases:65,
+    freqRate:4.1, risk:'high',
+    pattern:'training',
+    insight:{type:'red', msg:'<strong>65 cases across 4 products in 5 months — 4.1 cases/product/month.</strong> 62% of issues are calibration-related across all products. When calibration issues appear on multiple unrelated products simultaneously, the common factor is almost always operator handling. Recommend an on-site training session before next service visit.'},
+    byProduct:[
+      {name:'YAG Laser',   color:'#1B3A8C', monthly:[3,4,5,6,7],  code:'L-series'},
+      {name:'B-Scan',      color:'#7C3AED', monthly:[2,3,3,4,5],  code:'B-series'},
+      {name:'Green Laser', color:'#059669', monthly:[2,2,3,3,4],  code:'G-series'},
+      {name:'Phaco System',color:'#DC2626', monthly:[1,2,2,2,2],  code:'PS-series'},
+    ],
+    whyBreakdown:[
+      {name:'Calibration / Settings',        pct:62, color:'#1B3A8C'},
+      {name:'User Training / Operator Error', pct:21, color:'#D97706'},
+      {name:'Hardware / Component',           pct:12, color:'#DC2626'},
+      {name:'No Fault Found',                 pct:5,  color:'#94A3B8'},
+    ],
+    recommendations:[
+      {product:'YAG Laser',    freq:'1.75/mo', trend:'up',   action:'train', text:'Schedule operator training — joystick & calibration handling'},
+      {product:'B-Scan',       freq:'1.25/mo', trend:'up',   action:'train', text:'Include probe calibration in training session'},
+      {product:'Green Laser',  freq:'1.00/mo', trend:'up',   action:'watch', text:'Monitor — currently borderline, likely same operator issue'},
+      {product:'Phaco System', freq:'0.50/mo', trend:'flat', action:'pm',    text:'On track — next scheduled PM in 2 months'},
+    ],
+  },
+  {
+    id:'arvind', name:'Arvind Eye Care', city:'Madurai',
+    initials:'AE', avatarColor:'#059669',
+    productCount:6, products:['YAG Laser','B-Scan','Slit Lamp','Tonometer','Fundus Camera','Autorefractor'],
+    monthly:[7,8,9,8,10], totalCases:42,
+    freqRate:1.4, risk:'med',
+    pattern:'calibration',
+    insight:{type:'amber', msg:'<strong>42 cases across 6 products — 1.4 cases/product/month.</strong> Calibration drift is 55% of issues, concentrated on optical instruments (Slit Lamp, Fundus Camera). This pattern often indicates environmental factors — check for dust, humidity, or vibration near the equipment area.'},
+    byProduct:[
+      {name:'Slit Lamp',      color:'#D97706', monthly:[2,2,3,2,3], code:'SL-series'},
+      {name:'Fundus Camera',  color:'#7C3AED', monthly:[2,2,2,2,2], code:'FC-series'},
+      {name:'YAG Laser',      color:'#1B3A8C', monthly:[1,2,2,2,2], code:'L-series'},
+      {name:'B-Scan',         color:'#2F5DC2', monthly:[1,1,1,1,2], code:'B-series'},
+      {name:'Tonometer',      color:'#0D9488', monthly:[1,1,1,0,1], code:'T-series'},
+      {name:'Autorefractor',  color:'#DC2626', monthly:[0,0,0,1,0], code:'AR-series'},
+    ],
+    whyBreakdown:[
+      {name:'Calibration / Settings',  pct:55, color:'#1B3A8C'},
+      {name:'Preventive Maintenance',  pct:26, color:'#0D9488'},
+      {name:'Hardware / Component',    pct:14, color:'#DC2626'},
+      {name:'No Fault Found',          pct:5,  color:'#94A3B8'},
+    ],
+    recommendations:[
+      {product:'Slit Lamp',     freq:'0.80/mo', trend:'up',   action:'site',  text:'Inspect room environment — possible dust/humidity ingress'},
+      {product:'Fundus Camera', freq:'0.60/mo', trend:'flat', action:'pm',    text:'Due for PM — clean optical path'},
+      {product:'YAG Laser',     freq:'0.54/mo', trend:'flat', action:'watch', text:'Within normal range — continue monitoring'},
+      {product:'B-Scan',        freq:'0.36/mo', trend:'flat', action:'pm',    text:'On track'},
+      {product:'Tonometer',     freq:'0.24/mo', trend:'flat', action:'watch', text:'Low frequency — no action needed'},
+      {product:'Autorefractor', freq:'0.06/mo', trend:'dn',   action:'watch', text:'Minimal issues — good'},
+    ],
+  },
+  {
+    id:'lvpei', name:'LV Prasad Eye Institute', city:'Hyderabad',
+    initials:'LP', avatarColor:'#7C3AED',
+    productCount:10, products:['YAG Laser','Green Laser','B-Scan','OCT System','Phaco System','Vitrectomy','Slit Lamp','Fundus Camera','Autorefractor','Tonometer'],
+    monthly:[6,7,6,8,7], totalCases:34,
+    freqRate:0.68, risk:'low',
+    pattern:'normal',
+    insight:{type:'green', msg:'<strong>34 cases across 10 products — 0.68 cases/product/month.</strong> Model customer. Issue volume is within expected norms for a fleet of this size. Breakdown is diverse with no dominant pattern, indicating good equipment management practices. No immediate action required.'},
+    byProduct:[
+      {name:'YAG Laser',    color:'#1B3A8C', monthly:[1,2,1,2,2], code:'L-series'},
+      {name:'OCT System',   color:'#DC2626', monthly:[1,1,2,1,1], code:'OCT-series'},
+      {name:'Phaco System', color:'#D97706', monthly:[1,1,1,2,1], code:'PS-series'},
+      {name:'B-Scan',       color:'#7C3AED', monthly:[1,1,0,1,1], code:'B-series'},
+      {name:'Slit Lamp',    color:'#059669', monthly:[0,1,1,1,1], code:'SL-series'},
+      {name:'Others (5)',   color:'#94A3B8', monthly:[2,1,1,1,1], code:'various'},
+    ],
+    whyBreakdown:[
+      {name:'Hardware / Component',    pct:38, color:'#DC2626'},
+      {name:'Calibration / Settings',  pct:32, color:'#1B3A8C'},
+      {name:'Preventive Maintenance',  pct:21, color:'#0D9488'},
+      {name:'No Fault Found',          pct:9,  color:'#94A3B8'},
+    ],
+    recommendations:[
+      {product:'All products', freq:'0.68/mo', trend:'flat', action:'pm', text:'Continue scheduled PM programme — no issues detected'},
+    ],
+  },
+  {
+    id:'dra', name:"Dr. Agarwal's Eye Hospital", city:'Mumbai',
+    initials:'DA', avatarColor:'#DC2626',
+    productCount:7, products:['YAG Laser','Green Laser','Phaco System','Vitrectomy','B-Scan','Slit Lamp','Tonometer'],
+    monthly:[10,12,15,16,19], totalCases:72,
+    freqRate:2.9, risk:'high',
+    pattern:'electrical',
+    insight:{type:'red', msg:'<strong>72 cases across 7 products — 2.9 cases/product/month and rising.</strong> 48% of issues are E1 errors, power instability, and post-repair recurrence — a strong electrical infrastructure signal. Cases spread evenly across all 7 products, which rules out a single product fault. Recommend an electrical audit of the facility and UPS/voltage stabiliser check before the next service round.'},
+    byProduct:[
+      {name:'YAG Laser',    color:'#1B3A8C', monthly:[3,3,4,4,5], code:'L-series'},
+      {name:'Phaco System', color:'#DC2626', monthly:[2,3,3,4,4], code:'PS-series'},
+      {name:'Green Laser',  color:'#059669', monthly:[2,2,3,3,4], code:'G-series'},
+      {name:'Vitrectomy',   color:'#7C3AED', monthly:[1,2,2,2,3], code:'VR-series'},
+      {name:'B-Scan',       color:'#0D9488', monthly:[1,1,1,2,2], code:'B-series'},
+      {name:'Slit Lamp',    color:'#D97706', monthly:[1,1,1,1,1], code:'SL-series'},
+      {name:'Tonometer',    color:'#2F5DC2', monthly:[0,0,1,0,0], code:'T-series'},
+    ],
+    whyBreakdown:[
+      {name:'E1 / Power instability',  pct:48, color:'#DC2626'},
+      {name:'Calibration / Settings',  pct:28, color:'#1B3A8C'},
+      {name:'Hardware / Component',    pct:17, color:'#D97706'},
+      {name:'No Fault Found',          pct:7,  color:'#94A3B8'},
+    ],
+    recommendations:[
+      {product:'All products',  freq:'2.9/mo', trend:'up',  action:'site', text:'Electrical audit required — UPS and voltage stabiliser check urgent'},
+      {product:'YAG Laser',     freq:'1.26/mo',trend:'up',  action:'site', text:'E1 errors likely voltage-related — do not replace board until audit done'},
+      {product:'Phaco System',  freq:'1.03/mo',trend:'up',  action:'site', text:'Power cycling issues — same root cause suspected'},
+    ],
+  },
+  {
+    id:'narayana', name:'Narayana Eye Hospital', city:'Bengaluru',
+    initials:'NH', avatarColor:'#0D9488',
+    productCount:5, products:['YAG Laser','B-Scan','Phaco System','Slit Lamp','OCT System'],
+    monthly:[5,6,7,7,8], totalCases:33,
+    freqRate:1.32, risk:'med',
+    pattern:'calibration',
+    insight:{type:'amber', msg:'<strong>33 cases across 5 products — 1.32 cases/product/month, slowly rising.</strong> Calibration issues make up 58%. Pattern is consistent with equipment ageing — most of this fleet is 3–5 years old. Recommend proactive calibration check schedule rather than waiting for customer calls.'},
+    byProduct:[
+      {name:'YAG Laser',    color:'#1B3A8C', monthly:[2,2,2,3,3], code:'L-series'},
+      {name:'B-Scan',       color:'#7C3AED', monthly:[1,2,2,2,2], code:'B-series'},
+      {name:'Phaco System', color:'#DC2626', monthly:[1,1,1,1,2], code:'PS-series'},
+      {name:'Slit Lamp',    color:'#D97706', monthly:[1,1,1,1,1], code:'SL-series'},
+      {name:'OCT System',   color:'#059669', monthly:[0,0,1,0,0], code:'OCT-series'},
+    ],
+    whyBreakdown:[
+      {name:'Calibration / Settings', pct:58, color:'#1B3A8C'},
+      {name:'Hardware / Component',   pct:24, color:'#DC2626'},
+      {name:'Preventive Maintenance', pct:12, color:'#0D9488'},
+      {name:'No Fault Found',         pct:6,  color:'#94A3B8'},
+    ],
+    recommendations:[
+      {product:'YAG Laser',    freq:'0.80/mo', trend:'up',   action:'pm',    text:'Schedule proactive calibration check — 3+ years old'},
+      {product:'B-Scan',       freq:'0.54/mo', trend:'up',   action:'watch', text:'Monitor — possible probe ageing'},
+      {product:'Phaco System', freq:'0.40/mo', trend:'up',   action:'pm',    text:'Due for annual PM'},
+      {product:'Slit Lamp',    freq:'0.30/mo', trend:'flat', action:'watch', text:'Within norms'},
+      {product:'OCT System',   freq:'0.06/mo', trend:'flat', action:'watch', text:'Good — low frequency'},
+    ],
+  },
+  {
+    id:'mgm', name:'MGM Eye Hospital', city:'Puducherry',
+    initials:'MG', avatarColor:'#D97706',
+    productCount:2, products:['YAG Laser','B-Scan'],
+    monthly:[4,5,6,7,8], totalCases:30,
+    freqRate:6.0, risk:'high',
+    pattern:'training',
+    insight:{type:'red', msg:'<strong>30 cases from just 2 products — 6.0 cases/product/month and rising every month.</strong> This is the highest frequency ratio in the customer base. 71% are calibration and operator error issues on the same 2 products. Given the small fleet size, this is almost certainly a staffing/training issue — possibly high operator turnover or a new team member. Immediate intervention recommended.'},
+    byProduct:[
+      {name:'YAG Laser', color:'#1B3A8C', monthly:[3,3,4,4,5], code:'L-series'},
+      {name:'B-Scan',    color:'#7C3AED', monthly:[1,2,2,3,3], code:'B-series'},
+    ],
+    whyBreakdown:[
+      {name:'User Training / Operator Error', pct:45, color:'#D97706'},
+      {name:'Calibration / Settings',         pct:26, color:'#1B3A8C'},
+      {name:'No Fault Found',                 pct:18, color:'#94A3B8'},
+      {name:'Hardware / Component',           pct:11, color:'#DC2626'},
+    ],
+    recommendations:[
+      {product:'YAG Laser', freq:'3.8/mo', trend:'up', action:'train', text:'Urgent: on-site training + written SOP for daily calibration check'},
+      {product:'B-Scan',    freq:'2.2/mo', trend:'up', action:'train', text:'Probe handling training required — high NFF rate suggests misreporting'},
+    ],
+  },
+  {
+    id:'sankara', name:'Sankara Nethralaya', city:'Chennai',
+    initials:'SN', avatarColor:'#2F5DC2',
+    productCount:10, products:['YAG Laser','Green Laser','B-Scan','OCT','Phaco','Vitrectomy','Slit Lamp','Fundus Camera','Autorefractor','Tonometer'],
+    monthly:[4,3,5,4,4], totalCases:20,
+    freqRate:0.4, risk:'low',
+    pattern:'normal',
+    insight:{type:'green', msg:'<strong>20 cases across 10 products — 0.4 cases/product/month.</strong> Excellent performance. This customer runs a well-trained team and follows recommended PM schedules. The low NFF rate and diverse issue spread are both positive indicators. Benchmark account.'},
+    byProduct:[
+      {name:'YAG Laser',  color:'#1B3A8C', monthly:[1,1,1,1,1], code:'L-series'},
+      {name:'Phaco',      color:'#DC2626', monthly:[1,0,1,1,1],  code:'PS-series'},
+      {name:'B-Scan',     color:'#7C3AED', monthly:[0,1,1,0,1],  code:'B-series'},
+      {name:'OCT',        color:'#059669', monthly:[1,1,1,1,0],  code:'OCT-series'},
+      {name:'Others (6)', color:'#94A3B8', monthly:[1,0,1,1,1],  code:'various'},
+    ],
+    whyBreakdown:[
+      {name:'Preventive Maintenance', pct:40, color:'#0D9488'},
+      {name:'Hardware / Component',   pct:30, color:'#DC2626'},
+      {name:'Calibration / Settings', pct:25, color:'#1B3A8C'},
+      {name:'No Fault Found',         pct:5,  color:'#94A3B8'},
+    ],
+    recommendations:[
+      {product:'All products', freq:'0.4/mo', trend:'flat', action:'pm', text:'Continue existing PM programme — no changes needed'},
+    ],
+  },
+  {
+    id:'vasan', name:'Vasan Eye Care', city:'Coimbatore',
+    initials:'VC', avatarColor:'#059669',
+    productCount:3, products:['YAG Laser','Slit Lamp','Tonometer'],
+    monthly:[3,4,4,5,5], totalCases:21,
+    freqRate:1.4, risk:'med',
+    pattern:'calibration',
+    insight:{type:'amber', msg:'<strong>21 cases across 3 products — 1.4 cases/product/month, stable.</strong> Mostly calibration issues on YAG Laser (71% of cases). No urgent action needed but recommend a YAG-specific calibration training for the operator.'},
+    byProduct:[
+      {name:'YAG Laser', color:'#1B3A8C', monthly:[2,3,3,4,3], code:'L-series'},
+      {name:'Slit Lamp', color:'#D97706', monthly:[1,1,1,1,2],  code:'SL-series'},
+      {name:'Tonometer', color:'#0D9488', monthly:[0,0,0,0,0],  code:'T-series'},
+    ],
+    whyBreakdown:[
+      {name:'Calibration / Settings',         pct:71, color:'#1B3A8C'},
+      {name:'User Training / Operator Error', pct:19, color:'#D97706'},
+      {name:'Hardware / Component',           pct:10, color:'#DC2626'},
+    ],
+    recommendations:[
+      {product:'YAG Laser', freq:'1.00/mo', trend:'flat', action:'train', text:'YAG calibration SOP training recommended'},
+      {product:'Slit Lamp', freq:'0.40/mo', trend:'up',   action:'watch', text:'Minor upward trend — monitor next month'},
+      {product:'Tonometer', freq:'0.00/mo', trend:'flat', action:'pm',    text:'No issues — include in next scheduled PM'},
+    ],
+  },
+];
+
+// ── CUSTOMER STATE + DROPDOWN ─────────────────────────────────────────────────
+let currentView = 'product';
+let currentCustomer = null;
+let cddOpen = false;
+let custCharts = {};
+
+function setView(mode) {
+  currentView = mode;
+  document.getElementById('vtProd').classList.toggle('active', mode==='product');
+  document.getElementById('vtCust').classList.toggle('active', mode==='customer');
+  document.getElementById('prodSide').style.display = mode==='product' ? 'flex' : 'none';
+  document.getElementById('custSide').style.display = mode==='customer' ? 'flex' : 'none';
+  if (mode==='product') {
+    document.getElementById('topbarTitle').textContent = 'Issue Trend Analysis — Burn Up & Burn Down';
+  } else {
+    document.getElementById('topbarTitle').textContent = currentCustomer
+      ? `${CUSTOMERS.find(c=>c.id===currentCustomer)?.name} — Customer Analysis`
+      : 'Customer Analysis — Select a customer to begin';
+    if (!currentCustomer) showCustEmpty();
+  }
+}
+
+function showCustEmpty() {
+  Object.values(custCharts).forEach(c=>{try{c.destroy();}catch(e){}});
+  custCharts = {};
+  document.getElementById('mainContent').innerHTML = `
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 24px;text-align:center;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:0.2;margin-bottom:12px;"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      <div style="font-size:14px;font-weight:500;color:var(--text-mid);">Select a customer to view their analysis</div>
+      <div style="font-size:12px;color:var(--text-light);margin-top:5px;">Frequency score · Product heatmap · Issue pattern · Recommendations</div>
+    </div>`;
+}
+
+function toggleCDD() {
+  cddOpen = !cddOpen;
+  document.getElementById('cddPanel').style.display = cddOpen ? 'block' : 'none';
+  document.getElementById('cddCaret').classList.toggle('open', cddOpen);
+  document.getElementById('cddTrigger').classList.toggle('open', cddOpen);
+  if (cddOpen) { buildCDDList(''); setTimeout(()=>document.getElementById('cddSearch').focus(),50); }
+}
+
+function filterCDD(q) { buildCDDList(q); }
+
+function buildCDDList(q) {
+  const lq = q.toLowerCase();
+  const list = document.getElementById('cddList');
+  const items = CUSTOMERS.filter(c => !lq || c.name.toLowerCase().includes(lq) || c.city.toLowerCase().includes(lq));
+  if (!items.length) { list.innerHTML='<div style="padding:20px;text-align:center;font-size:12px;color:var(--text-light);">No customers found</div>'; return; }
+  list.innerHTML = items.map(c => {
+    const hl = lq ? c.name.replace(new RegExp(`(${lq.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi'), '<mark class="hlt">$1</mark>') : c.name;
+    const riskCls = c.risk==='high'?'cr-high':c.risk==='med'?'cr-med':'cr-low';
+    const riskLabel = c.risk==='high'?'High':c.risk==='med'?'Medium':'Low';
+    return `<div class="cdd-item${currentCustomer===c.id?' sel':''}" onclick="selectCustomer('${c.id}')">
+      <div class="cdd-item-avatar" style="background:${c.avatarColor};">${c.initials}</div>
+      <div class="cdd-item-info">
+        <div class="cdd-item-name">${hl}</div>
+        <div class="cdd-item-sub">${c.city} · ${c.productCount} products · ${c.totalCases} cases (5 months)</div>
+      </div>
+      <div class="cdd-item-right">
+        <span class="cdd-risk ${riskCls}">${riskLabel} risk</span>
+        <span class="cdd-freq">${c.freqRate}/product/mo</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function selectCustomer(id) {
+  currentCustomer = id;
+  cddOpen = false;
+  document.getElementById('cddPanel').style.display='none';
+  document.getElementById('cddCaret').classList.remove('open');
+  document.getElementById('cddTrigger').classList.remove('open');
+  const c = CUSTOMERS.find(x=>x.id===id);
+  document.getElementById('cddIcon').textContent = c.initials;
+  document.getElementById('cddIcon').style.background = c.avatarColor;
+  document.getElementById('cddIcon').style.color = '#fff';
+  document.getElementById('cddIcon').style.border = 'none';
+  document.getElementById('cddName').textContent = c.name;
+  const rEl = document.getElementById('cddRisk');
+  rEl.textContent = c.risk==='high'?'High risk':c.risk==='med'?'Medium':'Low risk';
+  rEl.className = 'cdd-risk ' + (c.risk==='high'?'cr-high':c.risk==='med'?'cr-med':'cr-low');
+  rEl.style.display = 'inline';
+  document.getElementById('topbarTitle').textContent = `${c.name} — Customer Analysis`;
+  renderCustomer(id);
+}
+
+document.addEventListener('click', e => {
+  if (cddOpen && !document.getElementById('cddWrap').contains(e.target)) {
+    cddOpen=false;
+    document.getElementById('cddPanel').style.display='none';
+    document.getElementById('cddCaret').classList.remove('open');
+    document.getElementById('cddTrigger').classList.remove('open');
+  }
+});
+
+// ── RENDER CUSTOMER ANALYSIS ──────────────────────────────────────────────────
+function renderCustomer(id) {
+  Object.values(custCharts).forEach(c=>{try{c.destroy();}catch(e){}});
+  custCharts = {};
+  const c = CUSTOMERS.find(x=>x.id===id);
+  const totalByMonth = MONTHS.map((_,mi)=>c.byProduct.reduce((s,p)=>s+p.monthly[mi],0));
+  const cumTotal = totalByMonth.map((v,i,a)=>a.slice(0,i+1).reduce((s,x)=>s+x,0));
+  const riskCls = c.risk==='high'?'rb-red':c.risk==='med'?'rb-amber':'rb-green';
+  const patternLabel = {training:'Training required',electrical:'Site / electrical issue',calibration:'Calibration pattern',normal:'Normal range'}[c.pattern]||'';
+  const patternColor = {training:'#D97706',electrical:'#DC2626',calibration:'#1B3A8C',normal:'#059669'}[c.pattern];
+  const bannerCls = {red:'cb-red',amber:'cb-amber',green:'cb-green',blue:'cb-blue'}[c.insight.type]||'cb-amber';
+  const freqColor = c.freqRate>=3?'var(--red)':c.freqRate>=2?'var(--amber)':'var(--green)';
+  const freqBadge = c.freqRate>=3?'d-up':c.freqRate>=2?'d-warn':'d-dn';
+  const threshold = c.productCount;
+
+  // heatmap rows
+  const hmRows = c.byProduct.map(p => {
+    const mx = Math.max(...p.monthly);
+    const total = p.monthly.reduce((a,b)=>a+b,0);
+    const lastD = p.monthly[4]-p.monthly[3];
+    const allUp = p.monthly.every((v,i,a)=>i===0||v>=a[i-1]);
+    const tClass = allUp?'pt-up':lastD>0?'pt-up':lastD<0?'pt-dn':'pt-flat';
+    const tText  = allUp?'↑ all 5':'↑ +'+lastD;
+    const cells = p.monthly.map(v=>{
+      const r=parseInt(p.color.slice(1,3),16),g=parseInt(p.color.slice(3,5),16),b=parseInt(p.color.slice(5,7),16);
+      const bg=`rgba(${r},${g},${b},${(0.07+(v/Math.max(mx,1))*0.8).toFixed(2)})`;
+      return `<td class="phm-cell"><div class="phm-chip" style="background:${bg};color:${p.color};">${v}</div></td>`;
+    }).join('');
+    return `<tr>
+      <td><div class="phm-label">${p.name}<span class="psub">${p.code}</span></div></td>
+      ${cells}
+      <td class="phm-total">${total}</td>
+      <td style="text-align:center;"><span class="phm-trend ${tClass}">${allUp?'↑ all 5':lastD>0?'↑ +'+lastD:lastD<0?'↓ '+lastD:'— flat'}</span></td>
+    </tr>`;
+  }).join('');
+
+  // why rows
+  const whyRows = c.whyBreakdown.map(w=>`
+    <div class="why-bar-row">
+      <div class="why-dot" style="background:${w.color};"></div>
+      <div class="why-label">${w.name}</div>
+      <div class="why-bar-wrap"><div class="why-bar-fill" style="width:${w.pct}%;background:${w.color};"></div></div>
+      <div class="why-pct">${w.pct}%</div>
+    </div>`).join('');
+
+  // rec rows
+  const recRows = c.recommendations.map(r=>{
+    const acCls = {train:'ac-train',site:'ac-site',pm:'ac-pm',watch:'ac-watch'}[r.action]||'ac-watch';
+    const acLabel = {train:'Training',site:'Site audit',pm:'Schedule PM',watch:'Monitor'}[r.action]||'Monitor';
+    const tClass = r.trend==='up'?'pt-up':r.trend==='dn'?'pt-dn':'pt-flat';
+    const tText  = r.trend==='up'?'↑':r.trend==='dn'?'↓':'—';
+    return `<tr>
+      <td style="font-weight:500;">${r.product}</td>
+      <td style="font-family:'DM Mono',monospace;">${r.freq}</td>
+      <td><span class="phm-trend ${tClass}">${tText}</span></td>
+      <td><span class="action-chip ${acCls}">${acLabel}</span></td>
+      <td style="color:var(--text-mid);">${r.text}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('mainContent').innerHTML = `
+    <div class="cust-banner ${bannerCls}">
+      <div class="cb-icon">${c.insight.type==='red'?'🔴':c.insight.type==='green'?'✅':'⚠️'}</div>
+      <div class="cb-text">${c.insight.msg}<br><span class="rec" style="margin-top:8px;display:inline-flex;">View root cause detail →</span></div>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi-card"><div class="kpi-accent" style="background:${c.avatarColor};"></div>
+        <div class="kl">Total cases (5 months)</div><div class="kv">${c.totalCases}</div>
+        <div class="ks">${c.productCount} products · ${c.city}</div>
+        <div class="kpi-delta ${freqBadge}">${c.freqRate} per product/mo</div>
+      </div>
+      <div class="kpi-card"><div class="kpi-accent" style="background:${freqColor};"></div>
+        <div class="kl">Frequency score</div>
+        <div class="kv" style="color:${freqColor};">${c.freqRate}</div>
+        <div class="ks">Cases ÷ products ÷ months</div>
+        <div class="kpi-delta ${freqBadge}">${c.freqRate>=2?'⚠ Above threshold':'✓ Within range'}</div>
+      </div>
+      <div class="kpi-card"><div class="kpi-accent" style="background:var(--purple);"></div>
+        <div class="kl">Products owned</div><div class="kv">${c.productCount}</div>
+        <div class="ks">${c.products.slice(0,3).join(', ')}${c.productCount>3?'…':''}</div>
+        <div class="kpi-delta" style="background:var(--purple-pale);color:var(--purple);">${c.monthly[4]} cases this month</div>
+      </div>
+      <div class="kpi-card"><div class="kpi-accent" style="background:${patternColor};"></div>
+        <div class="kl">AI pattern diagnosis</div>
+        <div class="kv" style="font-size:16px;line-height:1.2;">${patternLabel}</div>
+        <div class="ks">Based on issue category mix</div>
+        <div class="kpi-delta ${riskCls}">${c.risk==='high'?'High':c.risk==='med'?'Medium':'Low'} risk</div>
+      </div>
+    </div>
+
+    <div class="section-hd"><div class="s-title">Product activity heatmap — which products are generating calls?</div><div class="s-line"></div></div>
+    <div class="card chart-row-full">
+      <div class="card-head">
+        <div class="card-head-icon" style="background:#FEF3C7;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></div>
+        <div><div class="card-title">Case frequency by product — ${c.name}</div>
+        <div class="card-sub">Darker cells = more cases that month · a row that stays dark = a chronic problem product</div></div>
+      </div>
+      <div style="padding:14px 18px;overflow-x:auto;">
+        <table class="prod-hm-table">
+          <thead><tr>
+            <th class="phm-th pc">Product</th>
+            ${MONTHS.map(m=>`<th class="phm-th">${m}</th>`).join('')}
+            <th class="phm-th">Total</th><th class="phm-th">Trend</th>
+          </tr></thead>
+          <tbody>${hmRows}</tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section-hd"><div class="s-title">Why are they calling? &amp; Volume trend</div><div class="s-line"></div></div>
+    <div class="why-grid">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-head-icon" style="background:var(--purple-pale);"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div>
+          <div><div class="card-title">Issue category breakdown</div><div class="card-sub">What type of issues is this customer raising?</div></div>
+        </div>
+        <div class="chart-body">${whyRows}</div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <div class="card-head-icon" style="background:var(--blue-pale);"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1B3A8C" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg></div>
+          <div><div class="card-title">Monthly case volume</div><div class="card-sub">Total cases vs threshold (= products owned)</div></div>
+        </div>
+        <div class="chart-body"><canvas id="custVolChart" height="180"></canvas></div>
+      </div>
+    </div>
+
+    <div class="section-hd"><div class="s-title">Recommendations — by product</div><div class="s-line"></div></div>
+    <div class="card" style="margin-bottom:20px;">
+      <table class="rec-table">
+        <thead><tr><th>Product</th><th>Frequency</th><th>Trend</th><th>Action</th><th>Recommendation</th></tr></thead>
+        <tbody>${recRows}</tbody>
+      </table>
+    </div>
+  `;
+
+  requestAnimationFrame(()=>{
+    const ctx = document.getElementById('custVolChart').getContext('2d');
+    custCharts.vol = new Chart(ctx, {
+      type:'bar',
+      data:{
+        labels:MONTHS,
+        datasets:[
+          {label:'Cases this month',data:totalByMonth,backgroundColor:`${c.avatarColor}CC`,borderColor:c.avatarColor,borderWidth:0,borderRadius:4},
+          {label:`Threshold (${threshold} products)`,data:MONTHS.map(()=>threshold),type:'line',borderColor:'#DC2626',borderWidth:1.5,borderDash:[4,3],pointRadius:0,fill:false,tension:0},
+        ]
+      },
+      options:{...CHART_DEFAULTS,
+        plugins:{...CHART_DEFAULTS.plugins,legend:{display:true,position:'bottom',labels:{font:{family:'"DM Sans"',size:10},boxWidth:8,padding:10}}},
+        scales:{x:{...CHART_DEFAULTS.scales.x},y:{...CHART_DEFAULTS.scales.y,title:{display:true,text:'Cases',font:{family:'"DM Sans"',size:10}}}}
+      }
+    });
+  });
+}
+
+</script>
+<style>
+:root {
+  --navy:#0F2250; --navy-mid:#1B3A8C; --navy-light:#2347A8;
+  --blue:#1B3A8C; --blue-light:#2F5DC2; --blue-pale:#EEF2FB; --blue-border:#C0CEEE;
+  --teal:#0D9488; --teal-pale:#F0FDFA;
+  --green:#059669; --green-pale:#ECFDF5;
+  --amber:#D97706; --amber-pale:#FFFBEB;
+  --red:#DC2626; --red-pale:#FEF2F2;
+  --purple:#7C3AED; --purple-pale:#F5F3FF;
+  --text:#0F172A; --text-mid:#475569; --text-light:#94A3B8;
+  --border:#E2E8F0; --border-mid:#CBD5E1;
+  --bg:#F1F5F9; --card:#FFFFFF;
+  --radius:10px; --radius-lg:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--text);font-size:14px;display:flex;height:100vh;overflow:hidden;}
+
+/* ── SIDEBAR ── */
+.sidebar{width:220px;flex-shrink:0;background:var(--navy);display:flex;flex-direction:column;overflow:hidden;}
+.sidebar-logo{padding:16px 14px 14px;border-bottom:1px solid rgba(255,255,255,0.08);}
+.logo-wrap{background:#fff;border-radius:8px;padding:8px 10px;display:inline-block;}
+.logo-wrap img{width:140px;display:block;}
+.sidebar-logo .sub{font-size:9px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-top:6px;padding-left:2px;}
+.sidebar-section{padding:16px 12px 6px;}
+.sidebar-section-label{font-size:9px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.3);padding:0 6px;margin-bottom:6px;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:7px;color:rgba(255,255,255,0.6);font-size:13px;font-weight:400;cursor:pointer;transition:all 0.15s;margin-bottom:1px;text-decoration:none;}
+.nav-item:hover{background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.9);}
+.nav-item.active{background:var(--blue-light);color:#fff;font-weight:500;}
+.nav-item svg{width:15px;height:15px;flex-shrink:0;opacity:0.85;}
+.nav-badge{margin-left:auto;font-size:10px;font-weight:600;background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.8);padding:1px 6px;border-radius:10px;}
+.nav-badge.alert{background:#DC2626;color:#fff;}
+.new-badge{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;background:#FEF3C7;color:#92400E;padding:1px 5px;border-radius:3px;margin-left:5px;}
+.equip-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:7px;cursor:pointer;transition:all 0.15s;margin-bottom:1px;color:rgba(255,255,255,0.55);font-size:12px;}
+.equip-item:hover{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.85);}
+.equip-item.active{background:rgba(26,86,219,0.25);color:#93C5FD;}
+.equip-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.equip-count{margin-left:auto;font-size:10px;color:rgba(255,255,255,0.3);font-family:"DM Mono",monospace;}
+.sidebar-footer{margin-top:auto;padding:12px 18px;border-top:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:10px;}
+.avatar{width:28px;height:28px;border-radius:50%;background:var(--blue-light);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;flex-shrink:0;}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+.topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center;gap:16px;flex-shrink:0;}
+.topbar-title{font-size:15px;font-weight:600;color:var(--text);}
+.topbar-breadcrumb{font-size:12px;color:var(--text-light);}
+.topbar-breadcrumb span{color:var(--text-mid);}
+.topbar-actions{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.btn-sm{padding:6px 14px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:#fff;color:var(--text-mid);font-family:"DM Sans",sans-serif;transition:all 0.15s;display:flex;align-items:center;gap:5px;text-decoration:none;}
+.btn-sm:hover{border-color:var(--border-mid);background:var(--bg);}
+.btn-sm.primary{background:var(--blue);color:#fff;border-color:var(--blue);}
+
+/* ── FILTER BAR ── */
+.filter-bar{background:#fff;border-bottom:1px solid var(--border);padding:0 20px;height:50px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.fb-label{font-size:11px;font-weight:600;color:var(--text-light);white-space:nowrap;}
+.fb-sep{width:1px;height:22px;background:var(--border);margin:0 4px;}
+.ai-badge{margin-left:auto;display:flex;align-items:center;gap:5px;font-size:11px;font-weight:500;color:var(--purple);background:var(--purple-pale);padding:3px 10px;border-radius:20px;border:1px solid #DDD6FE;white-space:nowrap;}
+.ai-dot{width:6px;height:6px;border-radius:50%;background:var(--purple);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.3)}}
+.date-chip{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-mid);padding:5px 10px;border:1px solid var(--border);border-radius:7px;background:#fff;white-space:nowrap;}
+/* ── PRODUCT DROPDOWN ── */
+.dd-wrap{position:relative;flex-shrink:0;}
+.dd-trigger{display:flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-family:"DM Sans",sans-serif;font-size:13px;font-weight:500;color:var(--text);transition:all 0.15s;min-width:210px;user-select:none;}
+.dd-trigger:hover{border-color:var(--blue-border);}
+.dd-trigger.open{border-color:var(--blue);box-shadow:0 0 0 3px rgba(27,58,140,0.1);}
+.dd-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.dd-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.dd-ver{font-size:10px;font-family:"DM Mono",monospace;color:var(--text-light);background:var(--bg);padding:1px 6px;border-radius:4px;flex-shrink:0;}
+.dd-caret{width:14px;height:14px;color:var(--text-light);flex-shrink:0;transition:transform 0.15s;}
+.dd-caret.open{transform:rotate(180deg);}
+.dd-panel{position:absolute;top:calc(100% + 5px);left:0;min-width:310px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,0.11);z-index:1000;overflow:hidden;}
+.dd-search-row{padding:9px 10px 7px;border-bottom:1px solid var(--border);position:relative;}
+.dd-search{width:100%;border:1px solid var(--border);border-radius:7px;padding:7px 10px 7px 30px;font-family:"DM Sans",sans-serif;font-size:12px;color:var(--text);outline:none;background:#fff;}
+.dd-search:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(27,58,140,0.1);}
+.dd-search-ic{position:absolute;left:18px;top:50%;transform:translateY(-50%);color:var(--text-light);}
+.dd-list{max-height:290px;overflow-y:auto;}
+.dd-list::-webkit-scrollbar{width:4px;}
+.dd-list::-webkit-scrollbar-thumb{background:var(--border-mid);border-radius:3px;}
+.dd-group{font-size:9px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-light);background:var(--bg);padding:7px 12px 4px;border-top:1px solid var(--border);}
+.dd-group:first-child{border-top:none;}
+.dd-item{display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;transition:background 0.1s;}
+.dd-item:hover,.dd-item.sel{background:var(--blue-pale);}
+.dd-item-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.dd-item-info{flex:1;min-width:0;}
+.dd-item-name{font-size:12px;font-weight:500;color:var(--text);}
+.dd-item-sub{font-size:10px;color:var(--text-light);margin-top:1px;}
+.dd-item-cases{font-size:10px;font-family:"DM Mono",monospace;font-weight:600;color:var(--text-mid);background:var(--bg);padding:2px 7px;border-radius:4px;flex-shrink:0;}
+.dd-empty{padding:20px;text-align:center;font-size:12px;color:var(--text-light);}
+mark.hlt{background:#FEF9C3;border-radius:2px;font-style:normal;}
+.ver-select{padding:6px 28px 6px 10px;border:1px solid var(--border);border-radius:8px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2394A3B8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 8px center;font-family:"DM Sans",sans-serif;font-size:12px;font-weight:500;color:var(--text);cursor:pointer;outline:none;appearance:none;min-width:130px;transition:all 0.15s;}
+.ver-select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(27,58,140,0.1);}
+.ver-select:disabled{color:var(--text-light);cursor:default;}
+/* ── EMPTY STATE ── */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 24px;text-align:center;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);}
+.empty-state svg{width:40px;height:40px;color:var(--text-light);opacity:0.25;margin-bottom:12px;}
+.empty-state .em{font-size:14px;font-weight:500;color:var(--text-mid);}
+.empty-state .es{font-size:12px;color:var(--text-light);margin-top:5px;}
+
+/* ── CONTENT ── */
+.content{flex:1;overflow-y:auto;padding:20px 24px;}
+.content::-webkit-scrollbar{width:4px;}
+.content::-webkit-scrollbar-thumb{background:var(--border-mid);border-radius:4px;}
+
+/* ── KPI STRIP ── */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.kpi-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;position:relative;overflow:hidden;}
+.kpi-card .kpi-accent{position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--radius) var(--radius) 0 0;}
+.kpi-card .kl{font-size:10px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:var(--text-light);margin-bottom:6px;}
+.kpi-card .kv{font-size:24px;font-weight:600;color:var(--text);line-height:1;font-family:"DM Mono",monospace;}
+.kpi-card .ks{font-size:11px;color:var(--text-light);margin-top:4px;}
+.kpi-delta{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px;margin-top:5px;}
+.d-up{color:var(--red);background:var(--red-pale);}
+.d-dn{color:var(--green);background:var(--green-pale);}
+.d-warn{color:var(--amber);background:var(--amber-pale);}
+
+/* ── SECTION HEADER ── */
+.section-hd{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+.s-title{font-size:12px;font-weight:600;color:var(--text-mid);}
+.s-line{flex:1;height:1px;background:var(--border);}
+
+/* ── CHART CARDS ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;}
+.card-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.card-head-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.card-title{font-size:13px;font-weight:600;color:var(--text);}
+.card-sub{font-size:11px;color:var(--text-light);margin-top:1px;}
+.card-action{margin-left:auto;font-size:11px;font-weight:500;color:var(--blue);cursor:pointer;padding:4px 8px;border-radius:5px;}
+.card-action:hover{background:var(--blue-pale);}
+.chart-body{padding:18px;}
+
+/* chart row layouts */
+.chart-row-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.chart-row-full{margin-bottom:14px;}
+
+/* ── HEATMAP ── */
+.heatmap-wrap{padding:16px 18px;overflow-x:auto;}
+.heatmap-table{width:100%;border-collapse:separate;border-spacing:4px;}
+.hm-th{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-light);padding:4px 8px;text-align:center;white-space:nowrap;}
+.hm-th.issue-col{text-align:left;min-width:180px;}
+.hm-label{font-size:12px;font-weight:500;color:var(--text);padding:6px 8px;white-space:nowrap;}
+.hm-label .code{font-size:10px;font-family:"DM Mono",monospace;color:var(--text-light);display:block;margin-top:1px;}
+.hm-cell{text-align:center;padding:0;}
+.hm-chip{width:100%;height:36px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;font-family:"DM Mono",monospace;transition:transform 0.1s;cursor:default;}
+.hm-chip:hover{transform:scale(1.05);}
+.trend-arrow{font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;white-space:nowrap;}
+.ta-up{color:var(--red);background:var(--red-pale);}
+.ta-dn{color:var(--green);background:var(--green-pale);}
+.ta-flat{color:var(--text-light);background:var(--bg);}
+
+/* ── RECURRING ISSUES TABLE ── */
+.ri-table{width:100%;border-collapse:collapse;}
+.ri-table th{padding:8px 14px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-light);background:var(--bg);border-bottom:1px solid var(--border);text-align:left;}
+.ri-table td{padding:10px 14px;border-bottom:1px solid var(--border);font-size:12px;}
+.ri-table tr:last-child td{border-bottom:none;}
+.streak-dots{display:flex;gap:3px;align-items:center;}
+.streak-dot{width:10px;height:10px;border-radius:50%;}
+.sd-filled{background:var(--blue);}
+.sd-empty{background:var(--border);}
+.risk-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;}
+.rb-red{background:var(--red-pale);color:var(--red);}
+.rb-amber{background:var(--amber-pale);color:var(--amber);}
+.rb-green{background:var(--green-pale);color:var(--green);}
+
+/* ── MONTH SELECTOR ── */
+.month-btns{display:flex;gap:4px;}
+.month-btn{padding:3px 10px;border-radius:5px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:#fff;color:var(--text-mid);font-family:"DM Sans",sans-serif;transition:all 0.12s;}
+.month-btn:hover{border-color:var(--blue);color:var(--blue);}
+.month-btn.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+
+/* ── INSIGHT BANNER ── */
+.insight-banner{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border-radius:var(--radius);margin-bottom:14px;border:1px solid;}
+.ib-warn{background:var(--amber-pale);border-color:#FDE68A;}
+.ib-red{background:var(--red-pale);border-color:#FECACA;}
+.ib-green{background:var(--green-pale);border-color:#A7F3D0;}
+.ib-icon{flex-shrink:0;font-size:16px;}
+.ib-text{font-size:12px;line-height:1.6;color:var(--text-mid);}
+.ib-text strong{color:var(--text);}
+
+  /* ── VIEW TOGGLE ── */
+  .view-toggle{display:flex;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:2px;gap:1px;flex-shrink:0;}
+  .vt-btn{padding:4px 14px;border-radius:5px;font-size:12px;font-weight:500;cursor:pointer;border:none;background:transparent;color:var(--text-mid);font-family:"DM Sans",sans-serif;transition:all 0.15s;white-space:nowrap;}
+  .vt-btn:hover{color:var(--text);}
+  .vt-btn.active{background:#fff;color:var(--blue);box-shadow:0 1px 3px rgba(0,0,0,0.1);font-weight:600;}
+
+  /* ── CUSTOMER DROPDOWN (same pattern as product) ── */
+  .cdd-wrap{position:relative;flex-shrink:0;}
+  .cdd-trigger{display:flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-family:"DM Sans",sans-serif;font-size:13px;font-weight:500;color:var(--text);transition:all 0.15s;min-width:230px;user-select:none;}
+  .cdd-trigger:hover{border-color:var(--blue-border);}
+  .cdd-trigger.open{border-color:var(--blue);box-shadow:0 0 0 3px rgba(27,58,140,0.1);}
+  .cdd-icon{width:18px;height:18px;border-radius:50%;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:9px;font-weight:700;color:var(--text-light);}
+  .cdd-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .cdd-risk{font-size:9px;font-weight:700;padding:1px 6px;border-radius:3px;flex-shrink:0;}
+  .cr-high{background:var(--red-pale);color:var(--red);}
+  .cr-med{background:var(--amber-pale);color:var(--amber);}
+  .cr-low{background:var(--green-pale);color:var(--green);}
+  .cdd-caret{width:14px;height:14px;color:var(--text-light);flex-shrink:0;transition:transform 0.15s;}
+  .cdd-caret.open{transform:rotate(180deg);}
+  .cdd-panel{position:absolute;top:calc(100%+5px);left:0;min-width:340px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,0.12);z-index:1000;overflow:hidden;}
+  .cdd-search-wrap{padding:10px 10px 8px;border-bottom:1px solid var(--border);position:relative;}
+  .cdd-search{width:100%;border:1px solid var(--border);border-radius:7px;padding:7px 10px 7px 32px;font-family:"DM Sans",sans-serif;font-size:12px;color:var(--text);outline:none;background:#fff;}
+  .cdd-search:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(27,58,140,0.1);}
+  .cdd-si{position:absolute;left:18px;top:50%;transform:translateY(-50%);color:var(--text-light);pointer-events:none;}
+  .cdd-list{max-height:300px;overflow-y:auto;}
+  .cdd-list::-webkit-scrollbar{width:4px;}
+  .cdd-list::-webkit-scrollbar-thumb{background:var(--border-mid);border-radius:3px;}
+  .cdd-item{display:flex;align-items:center;gap:10px;padding:9px 12px;cursor:pointer;transition:background 0.1s;border-bottom:1px solid var(--border);}
+  .cdd-item:last-child{border-bottom:none;}
+  .cdd-item:hover{background:var(--blue-pale);}
+  .cdd-item.sel{background:var(--blue-pale);}
+  .cdd-item-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;}
+  .cdd-item-info{flex:1;min-width:0;}
+  .cdd-item-name{font-size:12px;font-weight:500;color:var(--text);}
+  .cdd-item-sub{font-size:10px;color:var(--text-light);margin-top:1px;}
+  .cdd-item-right{display:flex;flex-direction:column;align-items:flex-end;gap:3px;}
+  .cdd-freq{font-size:10px;font-family:"DM Mono",monospace;font-weight:600;color:var(--text-mid);}
+
+  /* ── CUSTOMER ANALYSIS ── */
+  .cust-banner{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border-radius:var(--radius);margin-bottom:14px;border:1px solid;}
+  .cb-red{background:var(--red-pale);border-color:#FECACA;}
+  .cb-amber{background:var(--amber-pale);border-color:#FDE68A;}
+  .cb-blue{background:var(--blue-pale);border-color:var(--blue-border);}
+  .cb-green{background:var(--green-pale);border-color:#A7F3D0;}
+  .cb-icon{font-size:16px;flex-shrink:0;}
+  .cb-text{font-size:12px;line-height:1.65;color:var(--text-mid);}
+  .cb-text strong{color:var(--text);}
+  .cb-text .rec{display:inline-flex;align-items:center;gap:5px;margin-top:7px;padding:5px 12px;background:var(--blue);color:#fff;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;}
+
+  .freq-score-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;position:relative;overflow:hidden;}
+  .freq-score-card .fsc-bar{position:absolute;top:0;left:0;right:0;height:3px;}
+  .fsc-val{font-size:28px;font-weight:600;font-family:"DM Mono",monospace;line-height:1;}
+  .fsc-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-light);margin-bottom:6px;}
+  .fsc-sub{font-size:11px;color:var(--text-light);margin-top:4px;}
+  .fsc-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;margin-top:5px;}
+
+  .prod-hm-table{width:100%;border-collapse:separate;border-spacing:3px;}
+  .phm-th{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-light);padding:3px 6px;text-align:center;}
+  .phm-th.pc{text-align:left;min-width:160px;}
+  .phm-label{font-size:11px;font-weight:500;color:var(--text);padding:5px 6px;white-space:nowrap;}
+  .phm-label .psub{font-size:9px;color:var(--text-light);display:block;}
+  .phm-cell{padding:0;}
+  .phm-chip{height:28px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;font-family:"DM Mono",monospace;transition:transform 0.1s;}
+  .phm-chip:hover{transform:scale(1.06);}
+  .phm-total{font-family:"DM Mono",monospace;font-size:11px;font-weight:600;color:var(--text-mid);text-align:center;}
+  .phm-trend{font-size:9px;font-weight:600;padding:1px 5px;border-radius:3px;}
+  .pt-up{color:var(--red);background:var(--red-pale);}
+  .pt-dn{color:var(--green);background:var(--green-pale);}
+  .pt-flat{color:var(--text-light);background:var(--bg);}
+
+  .why-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+  .why-bar-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);}
+  .why-bar-row:last-child{border-bottom:none;}
+  .why-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .why-label{font-size:12px;color:var(--text);flex:1;}
+  .why-bar-wrap{width:80px;height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
+  .why-bar-fill{height:100%;border-radius:3px;}
+  .why-pct{font-size:11px;font-weight:600;font-family:"DM Mono",monospace;color:var(--text-mid);min-width:30px;text-align:right;}
+
+  .rec-table{width:100%;border-collapse:collapse;}
+  .rec-table th{padding:8px 14px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-light);background:var(--bg);border-bottom:1px solid var(--border);text-align:left;}
+  .rec-table td{padding:9px 14px;border-bottom:1px solid var(--border);font-size:12px;}
+  .rec-table tr:last-child td{border-bottom:none;}
+  .action-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:5px;font-size:10px;font-weight:600;}
+  .ac-train{background:#FFFBEB;color:#92400E;border:1px solid #FDE68A;}
+  .ac-site{background:var(--red-pale);color:var(--red);border:1px solid #FECACA;}
+  .ac-pm{background:var(--green-pale);color:var(--green);border:1px solid #A7F3D0;}
+  .ac-watch{background:var(--blue-pale);color:var(--blue);border:1px solid var(--blue-border);}
+
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-wrap"><img src="appasamy-logo.png" alt="Appasamy Associates"></div>
+    <div class="sub">Service Excellence Platform</div>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Analytics</div>
+    <a class="nav-item" href="appasamy-service-excellence.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </a>
+    <a class="nav-item active" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      Trend Analysis
+      <span class="new-badge">New</span>
+    </a>
+    <a class="nav-item" href="appasamy-root-cause.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      Root Causes
+      <span class="nav-badge">79</span>
+    </a>
+    <a class="nav-item" href="appasamy-service-excellence.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      Technicians
+      <span class="new-badge">New</span>
+    </a>
+    <a class="nav-item" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+      Alerts
+      <span class="nav-badge alert">3</span>
+    </a>
+  </div>
+  <div class="sidebar-section" style="margin-top:4px;">
+    <div class="sidebar-section-label">Equipment</div>
+  </div>
+  <div style="padding:0 12px;">
+    <div class="equip-item active"><div class="equip-dot" style="background:#3B82F6;"></div>YAG Laser<span class="equip-count">87</span></div>
+    <div class="equip-item"><div class="equip-dot" style="background:#10B981;"></div>B-Scan<span class="equip-count">63</span></div>
+    <div class="equip-item"><div class="equip-dot" style="background:#F59E0B;"></div>Green Laser<span class="equip-count">41</span></div>
+    <div class="equip-item"><div class="equip-dot" style="background:#8B5CF6;"></div>Phaco System<span class="equip-count">38</span></div>
+    <div class="equip-item"><div class="equip-dot" style="background:#EF4444;"></div>Slit Lamp<span class="equip-count">29</span></div>
+  </div>
+  <div class="sidebar-footer">
+    <div class="avatar">MB</div>
+    <div style="flex:1;min-width:0;">
+      <div style="font-size:11px;font-weight:500;color:rgba(255,255,255,0.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Muthu Balakrishnan</div>
+      <div style="font-size:10px;color:rgba(255,255,255,0.4);">Service Manager</div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div>
+      <div class="topbar-breadcrumb">Analytics / <span>Trend Analysis</span></div>
+      <div class="topbar-title" id="topbarTitle">Issue Trend Analysis — Burn Up &amp; Burn Down</div>
+    </div>
+    <div class="topbar-actions">
+      <a class="btn-sm" href="appasamy-service-excellence.html">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Dashboard
+      </a>
+      <button class="btn-sm primary">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Export
+      </button>
+    </div>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar">
+    <!-- View toggle -->
+    <div class="view-toggle">
+      <button class="vt-btn active" id="vtProd" onclick="setView('product')">By Product</button>
+      <button class="vt-btn" id="vtCust" onclick="setView('customer')">By Customer</button>
+    </div>
+    <div class="fb-sep"></div>
+
+    <!-- Product side (shown in product mode) -->
+    <div id="prodSide" style="display:flex;align-items:center;gap:10px;">
+      <span class="fb-label">Product</span>
+    <div class="dd-wrap" id="ddWrap">
+      <div class="dd-trigger" id="ddTrigger" onclick="toggleDD()">
+        <div class="dd-dot" id="ddDot" style="background:var(--text-light);"></div>
+        <span class="dd-name" id="ddName">Select a product&hellip;</span>
+        <span class="dd-ver" id="ddVer" style="display:none;"></span>
+        <svg class="dd-caret" id="ddCaret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="dd-panel" id="ddPanel" style="display:none;">
+        <div class="dd-search-row">
+          <svg class="dd-search-ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input class="dd-search" id="ddSearch" type="text" placeholder="Search products&hellip;" oninput="filterDD(this.value)" autocomplete="off">
+        </div>
+        <div class="dd-list" id="ddList"></div>
+      </div>
+    </div>
+    <span class="fb-label" style="margin-left:2px;">Version</span>
+    <select class="ver-select" id="verSelect" onchange="onVerChange(this.value)" disabled>
+      <option value="">&mdash; select product first</option>
+    </select>
+    </div><!-- /prodSide -->
+
+    <!-- Customer side (shown in customer mode) -->
+    <div id="custSide" style="display:none;align-items:center;gap:10px;">
+      <span class="fb-label">Customer</span>
+      <div class="cdd-wrap" id="cddWrap">
+        <div class="cdd-trigger" id="cddTrigger" onclick="toggleCDD()">
+          <div class="cdd-icon" id="cddIcon">?</div>
+          <span class="cdd-name" id="cddName">Select a customer&hellip;</span>
+          <span class="cdd-risk" id="cddRisk" style="display:none;"></span>
+          <svg class="cdd-caret" id="cddCaret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="cdd-panel" id="cddPanel" style="display:none;">
+          <div class="cdd-search-wrap">
+            <svg class="cdd-si" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input class="cdd-search" id="cddSearch" type="text" placeholder="Search customers&hellip;" oninput="filterCDD(this.value)" autocomplete="off">
+          </div>
+          <div class="cdd-list" id="cddList"></div>
+        </div>
+      </div>
+    </div><!-- /custSide -->
+
+    <div class="fb-sep"></div>
+    <div class="date-chip">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Jan 2026 &rarr; May 2026
+    </div>
+    <div class="date-chip">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      All Ages
+    </div>
+    <div class="ai-badge">
+      <div class="ai-dot"></div>
+      AI analysis live
+    </div>
+  </div>
+
+  <div class="content" id="mainContent">
+    <!-- rendered by JS -->
+  </div>
+</main>
+
+<script>
+// ── DATA ────────────────────────────────────────────────────────────────────
+const MONTHS = ['Jan','Feb','Mar','Apr','May'];
+
+const PRODUCTS = {
+  yag: {
+    name:'YAG Laser', color:'#1B3A8C', totalCases:87,
+    issues:[
+      {code:'L804',name:'Joystick trigger',     monthly:[8,10,12,11,14], color:'#1B3A8C'},
+      {code:'L107',name:'Aiming beam',          monthly:[6,7,9,10,13],  color:'#DC2626'},
+      {code:'L102',name:'Energy level',         monthly:[5,6,7,8,10],   color:'#D97706'},
+      {code:'L803',name:'Base rail rack',       monthly:[4,5,6,8,10],   color:'#059669'},
+      {code:'L708',name:'E1 error',             monthly:[3,4,4,5,7],    color:'#7C3AED'},
+    ],
+    burndown:{
+      Jan:{open:26,days:[26,24,22,20,19,17,16,14,13,12,11,10,9,8,8,7,6,5,5,4,4,3,3,2,2,2,1,1,1,0]},
+      Feb:{open:32,days:[32,30,28,27,25,24,22,21,19,18,17,16,14,13,12,11,10,9,8,7,6,6,5,4,3,3,2,2,1,1]},
+      Mar:{open:38,days:[38,36,34,32,31,29,27,25,24,22,21,20,18,17,16,15,14,13,12,11,10,9,8,7,6,5,5,4,3,3]},
+      Apr:{open:42,days:[42,40,38,37,35,33,31,30,28,27,25,24,23,21,20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5]},
+      May:{open:48,days:[48,46,44,42,41,39,37,36,34,33,31,30,29,27,26,25,24,23,22,21,20,19,18,17,16,15,14,13,12,11]},
+    },
+    insight:{msg:'<strong>L107 Aiming Beam</strong> and <strong>L803 Base Rail</strong> have risen every single month for 5 months. Both need a preventive protocol before June.',type:'red'},
+    kpi:{avgMonthly:43,resRate:89,recurring:4,backlog:11},
+  },
+  green: {
+    name:'Green Laser', color:'#059669', totalCases:41,
+    issues:[
+      {code:'G201',name:'Power output low',    monthly:[4,5,5,6,7],  color:'#059669'},
+      {code:'G204',name:'Beam alignment',      monthly:[3,4,5,5,6],  color:'#1B3A8C'},
+      {code:'G210',name:'Fiber connector',     monthly:[2,2,3,4,5],  color:'#D97706'},
+      {code:'G215',name:'Spot size irregular', monthly:[2,3,3,4,5],  color:'#7C3AED'},
+      {code:'G220',name:'Shutter fault',       monthly:[1,2,2,3,3],  color:'#DC2626'},
+    ],
+    burndown:{
+      Jan:{open:12,days:[12,11,10,9,9,8,7,7,6,6,5,5,4,4,3,3,3,2,2,2,1,1,1,1,0,0,0,0,0,0]},
+      Feb:{open:16,days:[16,15,14,13,12,11,10,9,9,8,7,7,6,5,5,4,4,3,3,2,2,2,1,1,1,0,0,0,0,0]},
+      Mar:{open:18,days:[18,17,16,15,14,13,12,11,10,10,9,8,7,7,6,5,5,4,4,3,3,2,2,2,1,1,1,0,0,0]},
+      Apr:{open:22,days:[22,21,20,19,18,17,16,15,14,13,12,11,10,9,9,8,7,7,6,5,5,4,3,3,2,2,1,1,1,0]},
+      May:{open:26,days:[26,25,24,23,22,21,20,19,18,17,16,15,14,13,12,11,10,10,9,8,7,6,6,5,4,3,3,2,1,1]},
+    },
+    insight:{msg:'<strong>G201 Power Output</strong> is a consistent monthly issue across all 5 months. Check laser diode degradation curve for units commissioned in 2025.',type:'warn'},
+    kpi:{avgMonthly:24,resRate:93,recurring:3,backlog:5},
+  },
+  bscan: {
+    name:'B-Scan', color:'#7C3AED', totalCases:63,
+    issues:[
+      {code:'B301',name:'Probe calibration',  monthly:[5,6,7,8,9],   color:'#7C3AED'},
+      {code:'B305',name:'Image quality',      monthly:[3,4,4,5,6],   color:'#1B3A8C'},
+      {code:'B310',name:'Connectivity',       monthly:[2,3,3,4,5],   color:'#0D9488'},
+      {code:'B315',name:'Gain / sensitivity', monthly:[2,2,3,3,4],   color:'#D97706'},
+      {code:'B320',name:'Probe wear',         monthly:[1,2,2,3,3],   color:'#DC2626'},
+    ],
+    burndown:{
+      Jan:{open:13,days:[13,12,11,10,9,9,8,7,7,6,5,5,4,4,3,3,3,2,2,2,1,1,1,0,0,0,0,0,0,0]},
+      Feb:{open:17,days:[17,16,15,14,13,12,11,10,9,9,8,7,6,6,5,5,4,4,3,3,2,2,1,1,1,0,0,0,0,0]},
+      Mar:{open:19,days:[19,18,17,16,15,14,13,12,11,10,10,9,8,7,7,6,5,5,4,4,3,3,2,2,1,1,1,0,0,0]},
+      Apr:{open:23,days:[23,22,21,20,19,18,17,16,15,14,13,12,11,10,9,9,8,7,7,6,5,5,4,3,3,2,2,1,1,0]},
+      May:{open:27,days:[27,26,25,24,23,22,21,20,19,18,17,16,15,14,13,12,11,10,9,9,8,7,6,6,5,4,3,3,2,1]},
+    },
+    insight:{msg:'<strong>B301 Probe Calibration</strong> has grown every month (+80% since Jan). Likely linked to probe age — check calibration interval policy for probes &gt;18 months old.',type:'warn'},
+    kpi:{avgMonthly:32,resRate:91,recurring:4,backlog:7},
+  }
+};
+
+// ── STATE ───────────────────────────────────────────────────────────────────
+let currentProd = 'yag';
+let currentBDMonth = 'May';
+let charts = {};
+
+// ── HELPERS ─────────────────────────────────────────────────────────────────
+function destroyCharts() {
+  Object.values(charts).forEach(c => { try{ c.destroy(); }catch(e){} });
+  charts = {};
+}
+
+function heatColor(val, max, hex) {
+  const intensity = val / max;
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  const bg = `rgba(${r},${g},${b},${0.1 + intensity*0.75})`;
+  const textOpacity = intensity > 0.45 ? 1 : 0.6;
+  return {bg, textOpacity};
+}
+
+function trendArrow(monthly) {
+  const last = monthly[monthly.length-1];
+  const prev = monthly[monthly.length-2];
+  const first = monthly[0];
+  const allUp = monthly.every((v,i,a) => i===0 || v >= a[i-1]);
+  const delta = last - prev;
+  if (allUp)  return `<span class="trend-arrow ta-up">↑ all 5 months</span>`;
+  if (delta > 0) return `<span class="trend-arrow ta-up">↑ +${delta} vs prev</span>`;
+  if (delta < 0) return `<span class="trend-arrow ta-dn">↓ ${delta} vs prev</span>`;
+  return `<span class="trend-arrow ta-flat">— flat</span>`;
+}
+
+function isRecurring(monthly) {
+  return monthly.filter(v => v > 0).length >= 4;
+}
+
+function consecutiveMonths(monthly) {
+  let streak = 0, max = 0;
+  for (let v of monthly) { if(v>0){streak++;max=Math.max(max,streak);}else streak=0; }
+  return max;
+}
+
+// ── RENDER ───────────────────────────────────────────────────────────────────
+function renderAll(prodId) {
+  destroyCharts();
+  const p = PRODUCTS[prodId];
+  const c = document.getElementById('mainContent');
+
+  // determine backlog: opened - expected-ideal
+  const totalOpened = p.issues.reduce((s,i)=>s+i.monthly.reduce((a,b)=>a+b,0),0);
+  const totalByMonth = MONTHS.map((_,mi)=>p.issues.reduce((s,i)=>s+i.monthly[mi],0));
+  const cumOpened = totalByMonth.map((v,i,a)=>a.slice(0,i+1).reduce((s,x)=>s+x,0));
+  // simulate cumClosed = cumOpened * resolution rate with slight lag
+  const rr = p.kpi.resRate/100;
+  const cumClosed = cumOpened.map((v,i)=>Math.round(v * rr * (0.85 + i*0.03)));
+
+  c.innerHTML = `
+    <!-- INSIGHT BANNER -->
+    <div class="insight-banner ib-${p.insight.type}">
+      <div class="ib-icon">${p.insight.type==='red'?'🔴':'⚠️'}</div>
+      <div class="ib-text">${p.insight.msg} <a href="appasamy-root-cause.html" style="color:var(--blue);font-weight:600;text-decoration:none;">→ View root cause analysis</a></div>
+    </div>
+
+    <!-- KPI ROW -->
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-accent" style="background:${p.color};"></div>
+        <div class="kl">Avg cases / month</div>
+        <div class="kv">${p.kpi.avgMonthly}</div>
+        <div class="ks">Last 5 months</div>
+        <div class="kpi-delta d-up">↑ trend</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-accent" style="background:var(--green);"></div>
+        <div class="kl">Resolution rate</div>
+        <div class="kv">${p.kpi.resRate}<span style="font-size:14px;color:var(--text-light);">%</span></div>
+        <div class="ks">Cases closed same month</div>
+        <div class="kpi-delta d-dn">↓ Improving</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-accent" style="background:var(--amber);"></div>
+        <div class="kl">Recurring issues</div>
+        <div class="kv">${p.kpi.recurring}</div>
+        <div class="ks">Present in 4+ months</div>
+        <div class="kpi-delta d-warn">⚠ Needs attention</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-accent" style="background:var(--red);"></div>
+        <div class="kl">Current backlog</div>
+        <div class="kv">${p.kpi.backlog}</div>
+        <div class="ks">Open as of May 28</div>
+        <div class="kpi-delta d-up">↑ Growing</div>
+      </div>
+    </div>
+
+    <!-- SECTION: HEATMAP -->
+    <div class="section-hd">
+      <div class="s-title">Issue recurrence heatmap — same issue month on month</div>
+      <div class="s-line"></div>
+    </div>
+    <div class="card chart-row-full">
+      <div class="card-head">
+        <div class="card-head-icon" style="background:#FEF3C7;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+        </div>
+        <div>
+          <div class="card-title">Monthly issue frequency — ${p.name}</div>
+          <div class="card-sub">Darker = more cases · a row that stays dark every month = a recurring problem</div>
+        </div>
+      </div>
+      <div class="heatmap-wrap">
+        <table class="heatmap-table">
+          <thead>
+            <tr>
+              <th class="hm-th issue-col">Issue</th>
+              ${MONTHS.map(m=>`<th class="hm-th">${m}</th>`).join('')}
+              <th class="hm-th">Total</th>
+              <th class="hm-th">Trend</th>
+              <th class="hm-th">Streak</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${p.issues.map(iss => {
+              const rowMax = Math.max(...iss.monthly);
+              const total = iss.monthly.reduce((a,b)=>a+b,0);
+              const streak = consecutiveMonths(iss.monthly);
+              const cells = iss.monthly.map(v => {
+                const {bg, textOpacity} = heatColor(v, rowMax, iss.color);
+                return `<td class="hm-cell"><div class="hm-chip" style="background:${bg};color:${iss.color};opacity:${textOpacity};">${v}</div></td>`;
+              }).join('');
+              const streakDots = MONTHS.map((_,i)=>`<div class="streak-dot ${iss.monthly[i]>0?'sd-filled':'sd-empty'}"></div>`).join('');
+              return `<tr>
+                <td><div class="hm-label">${iss.name}<span class="code">${iss.code}</span></div></td>
+                ${cells}
+                <td style="text-align:center;font-family:'DM Mono',monospace;font-size:12px;font-weight:600;color:var(--text-mid);">${total}</td>
+                <td style="text-align:center;">${trendArrow(iss.monthly)}</td>
+                <td><div style="display:flex;align-items:center;gap:4px;justify-content:center;">
+                  <div class="streak-dots">${streakDots}</div>
+                  <span style="font-size:10px;font-family:'DM Mono',monospace;color:var(--text-light);">${streak}/5</span>
+                </div></td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- BURN UP + BURN DOWN -->
+    <div class="section-hd">
+      <div class="s-title">Burn up — cumulative cases raised vs resolved &nbsp;·&nbsp; Burn down — within-month resolution velocity</div>
+      <div class="s-line"></div>
+    </div>
+    <div class="chart-row-2">
+      <!-- BURN UP -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-head-icon" style="background:var(--blue-pale);">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1B3A8C" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          </div>
+          <div>
+            <div class="card-title">Burn up chart</div>
+            <div class="card-sub">Cumulative cases raised vs resolved · gap = open backlog</div>
+          </div>
+        </div>
+        <div class="chart-body"><canvas id="burnUpChart" height="220"></canvas></div>
+      </div>
+      <!-- BURN DOWN -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-head-icon" style="background:var(--green-pale);">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+          </div>
+          <div>
+            <div class="card-title">Burn down chart</div>
+            <div class="card-sub">Open cases per day within each month · steeper = faster resolution</div>
+          </div>
+          <div class="month-btns" id="monthBtns">
+            ${MONTHS.map(m=>`<button class="month-btn${m===currentBDMonth?' active':''}" onclick="switchMonth('${m}')">${m}</button>`).join('')}
+          </div>
+        </div>
+        <div class="chart-body"><canvas id="burnDownChart" height="220"></canvas></div>
+      </div>
+    </div>
+
+    <!-- ISSUE RECURRENCE TABLE -->
+    <div class="section-hd">
+      <div class="s-title">Recurring issue summary — issues present in 4 or more consecutive months</div>
+      <div class="s-line"></div>
+    </div>
+    <div class="card" style="margin-bottom:20px;">
+      <table class="ri-table">
+        <thead>
+          <tr>
+            <th>Issue code</th>
+            <th>Description</th>
+            <th>Monthly trend</th>
+            <th>Consecutive months</th>
+            <th>May vs Jan</th>
+            <th>Risk</th>
+            <th>Recommended action</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${p.issues.map(iss => {
+            const streak = consecutiveMonths(iss.monthly);
+            const growth = Math.round((iss.monthly[4]-iss.monthly[0])/iss.monthly[0]*100);
+            const allUp = iss.monthly.every((v,i,a)=>i===0||v>=a[i-1]);
+            const risk = allUp && growth>50 ? 'rb-red' : allUp ? 'rb-amber' : 'rb-green';
+            const riskLabel = risk==='rb-red'?'High':risk==='rb-amber'?'Medium':'Low';
+            const action = risk==='rb-red'?'Escalate — preventive protocol required':risk==='rb-amber'?'Review — check root cause pattern':'Monitor monthly';
+            const sparkCells = iss.monthly.map(v=>{
+              const h = Math.round(v/Math.max(...iss.monthly)*18);
+              return `<div style="width:8px;height:${h}px;background:${iss.color};border-radius:2px;opacity:0.7;align-self:flex-end;"></div>`;
+            }).join('');
+            const dots = MONTHS.map((_,i)=>`<div class="streak-dot ${iss.monthly[i]>0?'sd-filled':'sd-empty'}" style="background:${iss.monthly[i]>0?iss.color:'var(--border)'};"></div>`).join('');
+            return `<tr>
+              <td><span style="font-family:'DM Mono',monospace;font-size:11px;font-weight:700;color:${iss.color};">${iss.code}</span></td>
+              <td style="font-size:12px;font-weight:500;">${iss.name}</td>
+              <td><div style="display:flex;align-items:flex-end;gap:2px;height:22px;">${sparkCells}</div></td>
+              <td><div style="display:flex;align-items:center;gap:5px;"><div class="streak-dots">${dots}</div><span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text-mid);">${streak}/5</span></div></td>
+              <td><span style="font-size:12px;font-weight:600;color:${growth>0?'#DC2626':'#059669'};">${growth>0?'+':''}${growth}%</span></td>
+              <td><span class="risk-badge ${risk}">${riskLabel}</span></td>
+              <td style="font-size:11px;color:var(--text-mid);">${action}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  // Draw charts after DOM is ready
+  requestAnimationFrame(()=>{
+    drawBurnUp(prodId, cumOpened, cumClosed, totalByMonth);
+    drawBurnDown(prodId, currentBDMonth);
+  });
+}
+
+// ── CHARTS ───────────────────────────────────────────────────────────────────
+const CHART_DEFAULTS = {
+  responsive:true,
+  interaction:{mode:'index',intersect:false},
+  plugins:{legend:{display:true,position:'bottom',labels:{font:{family:'"DM Sans"',size:11},boxWidth:10,padding:14}},tooltip:{backgroundColor:'#fff',titleColor:'#0F172A',bodyColor:'#475569',borderColor:'#E2E8F0',borderWidth:1,padding:10,bodyFont:{family:'"DM Mono"'}}},
+  scales:{x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{family:'"DM Sans"',size:11}}},y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{family:'"DM Sans"',size:11}},beginAtZero:true}}
+};
+
+function drawBurnUp(prodId, cumOpened, cumClosed, monthly) {
+  const p = PRODUCTS[prodId];
+  const ctx = document.getElementById('burnUpChart').getContext('2d');
+  // per-issue cumulative lines too
+  const datasets = [
+    {
+      label:'Total raised (scope)',
+      data:cumOpened,
+      borderColor:p.color,
+      backgroundColor:`${p.color}10`,
+      borderWidth:2.5,
+      fill:true,
+      tension:0.35,
+      pointRadius:4,
+      pointBackgroundColor:p.color,
+    },
+    {
+      label:'Total resolved',
+      data:cumClosed,
+      borderColor:'#059669',
+      backgroundColor:'#05966910',
+      borderWidth:2.5,
+      fill:true,
+      tension:0.35,
+      borderDash:[],
+      pointRadius:4,
+      pointBackgroundColor:'#059669',
+    },
+    ...p.issues.map(iss=>({
+      label:`${iss.code} ${iss.name}`,
+      data:iss.monthly.map((v,i,a)=>a.slice(0,i+1).reduce((s,x)=>s+x,0)),
+      borderColor:iss.color,
+      borderWidth:1.5,
+      borderDash:[4,3],
+      pointRadius:3,
+      fill:false,
+      tension:0.3,
+      pointBackgroundColor:iss.color,
+    }))
+  ];
+  charts.burnUp = new Chart(ctx,{
+    type:'line',
+    data:{labels:MONTHS,datasets},
+    options:{...CHART_DEFAULTS,plugins:{...CHART_DEFAULTS.plugins,legend:{display:true,position:'bottom',labels:{font:{family:'"DM Sans"',size:10},boxWidth:8,padding:10}}}}
+  });
+}
+
+function drawBurnDown(prodId, month) {
+  const p = PRODUCTS[prodId];
+  const ctx = document.getElementById('burnDownChart').getContext('2d');
+  const days = Array.from({length:30},(_,i)=>`D${i+1}`);
+
+  // ideal line: straight from open to 0
+  const opened = p.burndown[month].open;
+  const ideal = days.map((_,i)=>Math.max(0,Math.round(opened - (opened/29)*i)));
+
+  // all months as faint lines, selected as bold
+  const allMonthDatasets = MONTHS.map(m=>{
+    const isSelected = m===month;
+    const pd = p.burndown[m];
+    return {
+      label:m,
+      data:pd.days,
+      borderColor: isSelected ? p.color : '#CBD5E1',
+      borderWidth: isSelected ? 2.5 : 1,
+      pointRadius: isSelected ? 3 : 0,
+      fill:false,
+      tension:0.25,
+      pointBackgroundColor: p.color,
+      order: isSelected ? 0 : 1,
+    };
+  });
+
+  charts.burnDown = new Chart(ctx,{
+    type:'line',
+    data:{
+      labels:days,
+      datasets:[
+        {label:'Ideal (100% resolution)',data:ideal,borderColor:'#CBD5E1',borderWidth:1.5,borderDash:[5,4],fill:false,pointRadius:0,tension:0,order:2},
+        ...allMonthDatasets
+      ]
+    },
+    options:{
+      ...CHART_DEFAULTS,
+      plugins:{
+        ...CHART_DEFAULTS.plugins,
+        legend:{display:true,position:'bottom',labels:{font:{family:'"DM Sans"',size:10},boxWidth:8,padding:10,filter:(item)=>MONTHS.includes(item.text)||item.text.includes('Ideal')}}
+      },
+      scales:{
+        x:{...CHART_DEFAULTS.scales.x,ticks:{...CHART_DEFAULTS.scales.x.ticks,maxTicksLimit:10}},
+        y:{...CHART_DEFAULTS.scales.y,title:{display:true,text:'Open cases',font:{family:'"DM Sans"',size:11}}}
+      }
+    }
+  });
+}
+
+// ── CATALOGUE (all products + versions) ──────────────────────────────────────
+const CATALOGUE = [
+  {group:'Laser Systems',    id:'yag',      name:'YAG Laser',           color:'#1B3A8C', versions:['V1.0','V1.5','V2.0','V2.5'],     defaultVer:'V2.5',  cases:{'V1.0':34,'V1.5':48,'V2.0':61,'V2.5':87}},
+  {group:'Laser Systems',    id:'green',    name:'Green Laser',         color:'#059669', versions:['V2.0','V3.0','V3.1'],            defaultVer:'V3.1',  cases:{'V2.0':22,'V3.0':35,'V3.1':41}},
+  {group:'Laser Systems',    id:'diode',    name:'Diode Laser',         color:'#DC2626', versions:['V1.0','V2.0','V2.1'],            defaultVer:'V2.1',  cases:{'V1.0':18,'V2.0':26,'V2.1':33}},
+  {group:'Laser Systems',    id:'excimer',  name:'Excimer Laser',       color:'#7C3AED', versions:['V4.0','V5.0'],                   defaultVer:'V5.0',  cases:{'V4.0':14,'V5.0':21}},
+  {group:'Laser Systems',    id:'pdlaser',  name:'Photodynamic Laser',  color:'#0D9488', versions:['V1.0','V1.5'],                   defaultVer:'V1.5',  cases:{'V1.0':9,'V1.5':15}},
+  {group:'Diagnostic',       id:'bscan',    name:'B-Scan',              color:'#7C3AED', versions:['V1.0','V2.0','V3.0'],            defaultVer:'V3.0',  cases:{'V1.0':28,'V2.0':45,'V3.0':63}},
+  {group:'Diagnostic',       id:'ascan',    name:'A-Scan',              color:'#2F5DC2', versions:['V1.0','V2.0'],                   defaultVer:'V2.0',  cases:{'V1.0':19,'V2.0':31}},
+  {group:'Diagnostic',       id:'slitlamp', name:'Slit Lamp',           color:'#D97706', versions:['SL-90','SL-120','SL-150'],       defaultVer:'SL-150',cases:{'SL-90':22,'SL-120':34,'SL-150':47}},
+  {group:'Diagnostic',       id:'autoref',  name:'Autorefractor',       color:'#059669', versions:['AR-100','AR-200','AR-300'],      defaultVer:'AR-300',cases:{'AR-100':16,'AR-200':24,'AR-300':38}},
+  {group:'Diagnostic',       id:'tono',     name:'Tonometer',           color:'#0D9488', versions:['T-1','T-2','T-3'],              defaultVer:'T-3',   cases:{'T-1':14,'T-2':22,'T-3':29}},
+  {group:'Diagnostic',       id:'oct',      name:'OCT System',          color:'#1B3A8C', versions:['OCT-1000','OCT-2000','OCT-3000'],defaultVer:'OCT-3000',cases:{'OCT-1000':21,'OCT-2000':35,'OCT-3000':52}},
+  {group:'Diagnostic',       id:'fundus',   name:'Fundus Camera',       color:'#7C3AED', versions:['FC-200','FC-500'],               defaultVer:'FC-500',cases:{'FC-200':17,'FC-500':28}},
+  {group:'Diagnostic',       id:'campo',    name:'Visual Field Analyser',color:'#D97706',versions:['VF-100','VF-200'],              defaultVer:'VF-200',cases:{'VF-100':13,'VF-200':24}},
+  {group:'Diagnostic',       id:'pach',     name:'Pachymeter',          color:'#059669', versions:['P-50','P-100'],                  defaultVer:'P-100', cases:{'P-50':8,'P-100':14}},
+  {group:'Diagnostic',       id:'kerato',   name:'Keratometer',         color:'#DC2626', versions:['KM-50','KM-100'],               defaultVer:'KM-100',cases:{'KM-50':11,'KM-100':19}},
+  {group:'Surgical Systems', id:'phaco',    name:'Phaco System',        color:'#DC2626', versions:['PS-100','PS-200','PS-300','PS-400'],defaultVer:'PS-400',cases:{'PS-100':23,'PS-200':35,'PS-300':41,'PS-400':52}},
+  {group:'Surgical Systems', id:'vitreo',   name:'Vitrectomy System',   color:'#0D9488', versions:['VR-100','VR-200','VR-300'],     defaultVer:'VR-300',cases:{'VR-100':16,'VR-200':28,'VR-300':37}},
+  {group:'Surgical Systems', id:'om',       name:'Operating Microscope',color:'#1B3A8C', versions:['OM-100','OM-200','OM-300'],     defaultVer:'OM-300',cases:{'OM-100':18,'OM-200':27,'OM-300':39}},
+  {group:'Surgical Systems', id:'cryo',     name:'Cryo Unit',           color:'#2F5DC2', versions:['CR-1','CR-2'],                  defaultVer:'CR-2',  cases:{'CR-1':10,'CR-2':17}},
+  {group:'IOL & Instruments',id:'iolinjector',name:'IOL Injector',      color:'#D97706', versions:['INJ-1','INJ-2','INJ-3'],        defaultVer:'INJ-3', cases:{'INJ-1':9,'INJ-2':15,'INJ-3':22}},
+  {group:'IOL & Instruments',id:'irrigator',name:'Irrigation/Aspiration',color:'#059669',versions:['IA-100','IA-200'],             defaultVer:'IA-200',cases:{'IA-100':8,'IA-200':14}},
+  {group:'Imaging',          id:'retcam',   name:'RetCam',              color:'#1B3A8C', versions:['RC-100','RC-200'],              defaultVer:'RC-200',cases:{'RC-100':11,'RC-200':18}},
+  {group:'Imaging',          id:'angio',    name:'FFA / Angiograph',    color:'#7C3AED', versions:['FFA-1','FFA-2'],               defaultVer:'FFA-2', cases:{'FFA-1':13,'FFA-2':21}},
+];
+
+// Products with full data — others get fallback from PRODUCTS using first available key
+const PROD_MAP = {yag:'yag', green:'green', bscan:'bscan'};
+
+let ddOpen = false;
+
+function buildDDList(q) {
+  const lq = (q||'').toLowerCase().trim();
+  const list = document.getElementById('ddList');
+  const groups = {};
+  CATALOGUE.forEach(p => {
+    if (lq && !p.name.toLowerCase().includes(lq) && !p.group.toLowerCase().includes(lq)) return;
+    if (!groups[p.group]) groups[p.group] = [];
+    groups[p.group].push(p);
+  });
+  const keys = Object.keys(groups);
+  if (!keys.length) { list.innerHTML = '<div class="dd-empty">No products found</div>'; return; }
+  list.innerHTML = keys.map(g => `
+    <div class="dd-group">${g} (${groups[g].length})</div>
+    ${groups[g].map(p => {
+      const cases = p.cases[p.defaultVer] || 0;
+      const isSel = currentProd && CATALOGUE.find(c=>c.id===currentProd)?.id === p.id;
+      const hl = lq ? p.name.replace(new RegExp('('+lq.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<mark class="hlt">$1</mark>') : p.name;
+      return `<div class="dd-item${isSel?' sel':''}" onclick="selectProd('${p.id}')">
+        <div class="dd-item-dot" style="background:${p.color};"></div>
+        <div class="dd-item-info">
+          <div class="dd-item-name">${hl}</div>
+          <div class="dd-item-sub">${p.versions.length} version${p.versions.length>1?'s':''} · Latest: ${p.defaultVer}</div>
+        </div>
+        <div class="dd-item-cases">${cases} cases</div>
+      </div>`;
+    }).join('')}
+  `).join('');
+}
+
+function toggleDD() {
+  ddOpen = !ddOpen;
+  document.getElementById('ddPanel').style.display = ddOpen ? 'block' : 'none';
+  document.getElementById('ddCaret').classList.toggle('open', ddOpen);
+  document.getElementById('ddTrigger').classList.toggle('open', ddOpen);
+  if (ddOpen) { buildDDList(''); document.getElementById('ddSearch').value = ''; document.getElementById('ddSearch').focus(); }
+}
+function filterDD(q) { buildDDList(q); }
+
+document.addEventListener('click', e => {
+  if (!document.getElementById('ddWrap').contains(e.target)) {
+    ddOpen = false;
+    document.getElementById('ddPanel').style.display = 'none';
+    document.getElementById('ddCaret').classList.remove('open');
+    document.getElementById('ddTrigger').classList.remove('open');
+  }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    ddOpen = false;
+    document.getElementById('ddPanel').style.display = 'none';
+    document.getElementById('ddCaret').classList.remove('open');
+    document.getElementById('ddTrigger').classList.remove('open');
+  }
+});
+
+function selectProd(id) {
+  const cat = CATALOGUE.find(p => p.id === id);
+  if (!cat) return;
+  ddOpen = false;
+  document.getElementById('ddPanel').style.display = 'none';
+  document.getElementById('ddCaret').classList.remove('open');
+  document.getElementById('ddTrigger').classList.remove('open');
+  document.getElementById('ddDot').style.background = cat.color;
+  document.getElementById('ddName').textContent = cat.name;
+  const verEl = document.getElementById('ddVer');
+  verEl.textContent = cat.defaultVer;
+  verEl.style.display = 'inline';
+  const sel = document.getElementById('verSelect');
+  sel.disabled = false;
+  sel.innerHTML = cat.versions.map(v => `<option value="${v}"${v===cat.defaultVer?' selected':''}>${v}${v===cat.defaultVer?' (latest)':''}</option>`).join('');
+  // map to PRODUCTS key — use exact match or fallback to yag
+  const prodKey = PROD_MAP[id] || 'yag';
+  currentProd = prodKey;
+  currentBDMonth = 'May';
+  renderAll(prodKey);
+}
+
+function onVerChange(ver) {
+  document.getElementById('ddVer').textContent = ver;
+  // version switch just re-renders same product for now
+  renderAll(currentProd);
+}
+
+// ── CONTROLS ─────────────────────────────────────────────────────────────────
+function switchProduct(prodId) {
+  currentProd = prodId;
+  currentBDMonth = 'May';
+  renderAll(prodId);
+}
+
+function switchMonth(month) {
+  currentBDMonth = month;
+  document.querySelectorAll('.month-btn').forEach(b=>{
+    b.classList.toggle('active', b.textContent===month);
+  });
+  if(charts.burnDown){ charts.burnDown.destroy(); delete charts.burnDown; }
+  drawBurnDown(currentProd, month);
+}
+
+// ── INIT — show empty state until product chosen ───────────────────────────
+document.getElementById('mainContent').innerHTML = `
+  <div class="empty-state">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+    <div class="em">Select a product and version to view trend analysis</div>
+    <div class="es">Burn up &nbsp;·&nbsp; Burn down &nbsp;·&nbsp; Issue recurrence heatmap &nbsp;·&nbsp; Month-on-month comparison</div>
+  </div>
+`;
+
+// ── CUSTOMER DATA ─────────────────────────────────────────────────────────────
+const CUSTOMERS = [
+  {
+    id:'shankar', name:'Shankar Eye Hospital', city:'Chennai',
+    initials:'SH', avatarColor:'#1B3A8C',
+    productCount:4, products:['YAG Laser','B-Scan','Green Laser','Phaco System'],
+    monthly:[8,11,13,15,18], totalCases:65,
+    freqRate:4.1, risk:'high',
+    pattern:'training',
+    insight:{type:'red', msg:'<strong>65 cases across 4 products in 5 months — 4.1 cases/product/month.</strong> 62% of issues are calibration-related across all products. When calibration issues appear on multiple unrelated products simultaneously, the common factor is almost always operator handling. Recommend an on-site training session before next service visit.'},
+    byProduct:[
+      {name:'YAG Laser',   color:'#1B3A8C', monthly:[3,4,5,6,7],  code:'L-series'},
+      {name:'B-Scan',      color:'#7C3AED', monthly:[2,3,3,4,5],  code:'B-series'},
+      {name:'Green Laser', color:'#059669', monthly:[2,2,3,3,4],  code:'G-series'},
+      {name:'Phaco System',color:'#DC2626', monthly:[1,2,2,2,2],  code:'PS-series'},
+    ],
+    whyBreakdown:[
+      {name:'Calibration / Settings',        pct:62, color:'#1B3A8C'},
+      {name:'User Training / Operator Error', pct:21, color:'#D97706'},
+      {name:'Hardware / Component',           pct:12, color:'#DC2626'},
+      {name:'No Fault Found',                 pct:5,  color:'#94A3B8'},
+    ],
+    recommendations:[
+      {product:'YAG Laser',    freq:'1.75/mo', trend:'up',   action:'train', text:'Schedule operator training — joystick & calibration handling'},
+      {product:'B-Scan',       freq:'1.25/mo', trend:'up',   action:'train', text:'Include probe calibration in training session'},
+      {product:'Green Laser',  freq:'1.00/mo', trend:'up',   action:'watch', text:'Monitor — currently borderline, likely same operator issue'},
+      {product:'Phaco System', freq:'0.50/mo', trend:'flat', action:'pm',    text:'On track — next scheduled PM in 2 months'},
+    ],
+  },
+  {
+    id:'arvind', name:'Arvind Eye Care', city:'Madurai',
+    initials:'AE', avatarColor:'#059669',
+    productCount:6, products:['YAG Laser','B-Scan','Slit Lamp','Tonometer','Fundus Camera','Autorefractor'],
+    monthly:[7,8,9,8,10], totalCases:42,
+    freqRate:1.4, risk:'med',
+    pattern:'calibration',
+    insight:{type:'amber', msg:'<strong>42 cases across 6 products — 1.4 cases/product/month.</strong> Calibration drift is 55% of issues, concentrated on optical instruments (Slit Lamp, Fundus Camera). This pattern often indicates environmental factors — check for dust, humidity, or vibration near the equipment area.'},
+    byProduct:[
+      {name:'Slit Lamp',      color:'#D97706', monthly:[2,2,3,2,3], code:'SL-series'},
+      {name:'Fundus Camera',  color:'#7C3AED', monthly:[2,2,2,2,2], code:'FC-series'},
+      {name:'YAG Laser',      color:'#1B3A8C', monthly:[1,2,2,2,2], code:'L-series'},
+      {name:'B-Scan',         color:'#2F5DC2', monthly:[1,1,1,1,2], code:'B-series'},
+      {name:'Tonometer',      color:'#0D9488', monthly:[1,1,1,0,1], code:'T-series'},
+      {name:'Autorefractor',  color:'#DC2626', monthly:[0,0,0,1,0], code:'AR-series'},
+    ],
+    whyBreakdown:[
+      {name:'Calibration / Settings',  pct:55, color:'#1B3A8C'},
+      {name:'Preventive Maintenance',  pct:26, color:'#0D9488'},
+      {name:'Hardware / Component',    pct:14, color:'#DC2626'},
+      {name:'No Fault Found',          pct:5,  color:'#94A3B8'},
+    ],
+    recommendations:[
+      {product:'Slit Lamp',     freq:'0.80/mo', trend:'up',   action:'site',  text:'Inspect room environment — possible dust/humidity ingress'},
+      {product:'Fundus Camera', freq:'0.60/mo', trend:'flat', action:'pm',    text:'Due for PM — clean optical path'},
+      {product:'YAG Laser',     freq:'0.54/mo', trend:'flat', action:'watch', text:'Within normal range — continue monitoring'},
+      {product:'B-Scan',        freq:'0.36/mo', trend:'flat', action:'pm',    text:'On track'},
+      {product:'Tonometer',     freq:'0.24/mo', trend:'flat', action:'watch', text:'Low frequency — no action needed'},
+      {product:'Autorefractor', freq:'0.06/mo', trend:'dn',   action:'watch', text:'Minimal issues — good'},
+    ],
+  },
+  {
+    id:'lvpei', name:'LV Prasad Eye Institute', city:'Hyderabad',
+    initials:'LP', avatarColor:'#7C3AED',
+    productCount:10, products:['YAG Laser','Green Laser','B-Scan','OCT System','Phaco System','Vitrectomy','Slit Lamp','Fundus Camera','Autorefractor','Tonometer'],
+    monthly:[6,7,6,8,7], totalCases:34,
+    freqRate:0.68, risk:'low',
+    pattern:'normal',
+    insight:{type:'green', msg:'<strong>34 cases across 10 products — 0.68 cases/product/month.</strong> Model customer. Issue volume is within expected norms for a fleet of this size. Breakdown is diverse with no dominant pattern, indicating good equipment management practices. No immediate action required.'},
+    byProduct:[
+      {name:'YAG Laser',    color:'#1B3A8C', monthly:[1,2,1,2,2], code:'L-series'},
+      {name:'OCT System',   color:'#DC2626', monthly:[1,1,2,1,1], code:'OCT-series'},
+      {name:'Phaco System', color:'#D97706', monthly:[1,1,1,2,1], code:'PS-series'},
+      {name:'B-Scan',       color:'#7C3AED', monthly:[1,1,0,1,1], code:'B-series'},
+      {name:'Slit Lamp',    color:'#059669', monthly:[0,1,1,1,1], code:'SL-series'},
+      {name:'Others (5)',   color:'#94A3B8', monthly:[2,1,1,1,1], code:'various'},
+    ],
+    whyBreakdown:[
+      {name:'Hardware / Component',    pct:38, color:'#DC2626'},
+      {name:'Calibration / Settings',  pct:32, color:'#1B3A8C'},
+      {name:'Preventive Maintenance',  pct:21, color:'#0D9488'},
+      {name:'No Fault Found',          pct:9,  color:'#94A3B8'},
+    ],
+    recommendations:[
+      {product:'All products', freq:'0.68/mo', trend:'flat', action:'pm', text:'Continue scheduled PM programme — no issues detected'},
+    ],
+  },
+  {
+    id:'dra', name:"Dr. Agarwal's Eye Hospital", city:'Mumbai',
+    initials:'DA', avatarColor:'#DC2626',
+    productCount:7, products:['YAG Laser','Green Laser','Phaco System','Vitrectomy','B-Scan','Slit Lamp','Tonometer'],
+    monthly:[10,12,15,16,19], totalCases:72,
+    freqRate:2.9, risk:'high',
+    pattern:'electrical',
+    insight:{type:'red', msg:'<strong>72 cases across 7 products — 2.9 cases/product/month and rising.</strong> 48% of issues are E1 errors, power instability, and post-repair recurrence — a strong electrical infrastructure signal. Cases spread evenly across all 7 products, which rules out a single product fault. Recommend an electrical audit of the facility and UPS/voltage stabiliser check before the next service round.'},
+    byProduct:[
+      {name:'YAG Laser',    color:'#1B3A8C', monthly:[3,3,4,4,5], code:'L-series'},
+      {name:'Phaco System', color:'#DC2626', monthly:[2,3,3,4,4], code:'PS-series'},
+      {name:'Green Laser',  color:'#059669', monthly:[2,2,3,3,4], code:'G-series'},
+      {name:'Vitrectomy',   color:'#7C3AED', monthly:[1,2,2,2,3], code:'VR-series'},
+      {name:'B-Scan',       color:'#0D9488', monthly:[1,1,1,2,2], code:'B-series'},
+      {name:'Slit Lamp',    color:'#D97706', monthly:[1,1,1,1,1], code:'SL-series'},
+      {name:'Tonometer',    color:'#2F5DC2', monthly:[0,0,1,0,0], code:'T-series'},
+    ],
+    whyBreakdown:[
+      {name:'E1 / Power instability',  pct:48, color:'#DC2626'},
+      {name:'Calibration / Settings',  pct:28, color:'#1B3A8C'},
+      {name:'Hardware / Component',    pct:17, color:'#D97706'},
+      {name:'No Fault Found',          pct:7,  color:'#94A3B8'},
+    ],
+    recommendations:[
+      {product:'All products',  freq:'2.9/mo', trend:'up',  action:'site', text:'Electrical audit required — UPS and voltage stabiliser check urgent'},
+      {product:'YAG Laser',     freq:'1.26/mo',trend:'up',  action:'site', text:'E1 errors likely voltage-related — do not replace board until audit done'},
+      {product:'Phaco System',  freq:'1.03/mo',trend:'up',  action:'site', text:'Power cycling issues — same root cause suspected'},
+    ],
+  },
+  {
+    id:'narayana', name:'Narayana Eye Hospital', city:'Bengaluru',
+    initials:'NH', avatarColor:'#0D9488',
+    productCount:5, products:['YAG Laser','B-Scan','Phaco System','Slit Lamp','OCT System'],
+    monthly:[5,6,7,7,8], totalCases:33,
+    freqRate:1.32, risk:'med',
+    pattern:'calibration',
+    insight:{type:'amber', msg:'<strong>33 cases across 5 products — 1.32 cases/product/month, slowly rising.</strong> Calibration issues make up 58%. Pattern is consistent with equipment ageing — most of this fleet is 3–5 years old. Recommend proactive calibration check schedule rather than waiting for customer calls.'},
+    byProduct:[
+      {name:'YAG Laser',    color:'#1B3A8C', monthly:[2,2,2,3,3], code:'L-series'},
+      {name:'B-Scan',       color:'#7C3AED', monthly:[1,2,2,2,2], code:'B-series'},
+      {name:'Phaco System', color:'#DC2626', monthly:[1,1,1,1,2], code:'PS-series'},
+      {name:'Slit Lamp',    color:'#D97706', monthly:[1,1,1,1,1], code:'SL-series'},
+      {name:'OCT System',   color:'#059669', monthly:[0,0,1,0,0], code:'OCT-series'},
+    ],
+    whyBreakdown:[
+      {name:'Calibration / Settings', pct:58, color:'#1B3A8C'},
+      {name:'Hardware / Component',   pct:24, color:'#DC2626'},
+      {name:'Preventive Maintenance', pct:12, color:'#0D9488'},
+      {name:'No Fault Found',         pct:6,  color:'#94A3B8'},
+    ],
+    recommendations:[
+      {product:'YAG Laser',    freq:'0.80/mo', trend:'up',   action:'pm',    text:'Schedule proactive calibration check — 3+ years old'},
+      {product:'B-Scan',       freq:'0.54/mo', trend:'up',   action:'watch', text:'Monitor — possible probe ageing'},
+      {product:'Phaco System', freq:'0.40/mo', trend:'up',   action:'pm',    text:'Due for annual PM'},
+      {product:'Slit Lamp',    freq:'0.30/mo', trend:'flat', action:'watch', text:'Within norms'},
+      {product:'OCT System',   freq:'0.06/mo', trend:'flat', action:'watch', text:'Good — low frequency'},
+    ],
+  },
+  {
+    id:'mgm', name:'MGM Eye Hospital', city:'Puducherry',
+    initials:'MG', avatarColor:'#D97706',
+    productCount:2, products:['YAG Laser','B-Scan'],
+    monthly:[4,5,6,7,8], totalCases:30,
+    freqRate:6.0, risk:'high',
+    pattern:'training',
+    insight:{type:'red', msg:'<strong>30 cases from just 2 products — 6.0 cases/product/month and rising every month.</strong> This is the highest frequency ratio in the customer base. 71% are calibration and operator error issues on the same 2 products. Given the small fleet size, this is almost certainly a staffing/training issue — possibly high operator turnover or a new team member. Immediate intervention recommended.'},
+    byProduct:[
+      {name:'YAG Laser', color:'#1B3A8C', monthly:[3,3,4,4,5], code:'L-series'},
+      {name:'B-Scan',    color:'#7C3AED', monthly:[1,2,2,3,3], code:'B-series'},
+    ],
+    whyBreakdown:[
+      {name:'User Training / Operator Error', pct:45, color:'#D97706'},
+      {name:'Calibration / Settings',         pct:26, color:'#1B3A8C'},
+      {name:'No Fault Found',                 pct:18, color:'#94A3B8'},
+      {name:'Hardware / Component',           pct:11, color:'#DC2626'},
+    ],
+    recommendations:[
+      {product:'YAG Laser', freq:'3.8/mo', trend:'up', action:'train', text:'Urgent: on-site training + written SOP for daily calibration check'},
+      {product:'B-Scan',    freq:'2.2/mo', trend:'up', action:'train', text:'Probe handling training required — high NFF rate suggests misreporting'},
+    ],
+  },
+  {
+    id:'sankara', name:'Sankara Nethralaya', city:'Chennai',
+    initials:'SN', avatarColor:'#2F5DC2',
+    productCount:10, products:['YAG Laser','Green Laser','B-Scan','OCT','Phaco','Vitrectomy','Slit Lamp','Fundus Camera','Autorefractor','Tonometer'],
+    monthly:[4,3,5,4,4], totalCases:20,
+    freqRate:0.4, risk:'low',
+    pattern:'normal',
+    insight:{type:'green', msg:'<strong>20 cases across 10 products — 0.4 cases/product/month.</strong> Excellent performance. This customer runs a well-trained team and follows recommended PM schedules. The low NFF rate and diverse issue spread are both positive indicators. Benchmark account.'},
+    byProduct:[
+      {name:'YAG Laser',  color:'#1B3A8C', monthly:[1,1,1,1,1], code:'L-series'},
+      {name:'Phaco',      color:'#DC2626', monthly:[1,0,1,1,1],  code:'PS-series'},
+      {name:'B-Scan',     color:'#7C3AED', monthly:[0,1,1,0,1],  code:'B-series'},
+      {name:'OCT',        color:'#059669', monthly:[1,1,1,1,0],  code:'OCT-series'},
+      {name:'Others (6)', color:'#94A3B8', monthly:[1,0,1,1,1],  code:'various'},
+    ],
+    whyBreakdown:[
+      {name:'Preventive Maintenance', pct:40, color:'#0D9488'},
+      {name:'Hardware / Component',   pct:30, color:'#DC2626'},
+      {name:'Calibration / Settings', pct:25, color:'#1B3A8C'},
+      {name:'No Fault Found',         pct:5,  color:'#94A3B8'},
+    ],
+    recommendations:[
+      {product:'All products', freq:'0.4/mo', trend:'flat', action:'pm', text:'Continue existing PM programme — no changes needed'},
+    ],
+  },
+  {
+    id:'vasan', name:'Vasan Eye Care', city:'Coimbatore',
+    initials:'VC', avatarColor:'#059669',
+    productCount:3, products:['YAG Laser','Slit Lamp','Tonometer'],
+    monthly:[3,4,4,5,5], totalCases:21,
+    freqRate:1.4, risk:'med',
+    pattern:'calibration',
+    insight:{type:'amber', msg:'<strong>21 cases across 3 products — 1.4 cases/product/month, stable.</strong> Mostly calibration issues on YAG Laser (71% of cases). No urgent action needed but recommend a YAG-specific calibration training for the operator.'},
+    byProduct:[
+      {name:'YAG Laser', color:'#1B3A8C', monthly:[2,3,3,4,3], code:'L-series'},
+      {name:'Slit Lamp', color:'#D97706', monthly:[1,1,1,1,2],  code:'SL-series'},
+      {name:'Tonometer', color:'#0D9488', monthly:[0,0,0,0,0],  code:'T-series'},
+    ],
+    whyBreakdown:[
+      {name:'Calibration / Settings',         pct:71, color:'#1B3A8C'},
+      {name:'User Training / Operator Error', pct:19, color:'#D97706'},
+      {name:'Hardware / Component',           pct:10, color:'#DC2626'},
+    ],
+    recommendations:[
+      {product:'YAG Laser', freq:'1.00/mo', trend:'flat', action:'train', text:'YAG calibration SOP training recommended'},
+      {product:'Slit Lamp', freq:'0.40/mo', trend:'up',   action:'watch', text:'Minor upward trend — monitor next month'},
+      {product:'Tonometer', freq:'0.00/mo', trend:'flat', action:'pm',    text:'No issues — include in next scheduled PM'},
+    ],
+  },
+];
+
+// ── CUSTOMER STATE + DROPDOWN ─────────────────────────────────────────────────
+let currentView = 'product';
+let currentCustomer = null;
+let cddOpen = false;
+let custCharts = {};
+
+function setView(mode) {
+  currentView = mode;
+  document.getElementById('vtProd').classList.toggle('active', mode==='product');
+  document.getElementById('vtCust').classList.toggle('active', mode==='customer');
+  document.getElementById('prodSide').style.display = mode==='product' ? 'flex' : 'none';
+  document.getElementById('custSide').style.display = mode==='customer' ? 'flex' : 'none';
+  if (mode==='product') {
+    document.getElementById('topbarTitle').textContent = 'Issue Trend Analysis — Burn Up & Burn Down';
+  } else {
+    document.getElementById('topbarTitle').textContent = currentCustomer
+      ? `${CUSTOMERS.find(c=>c.id===currentCustomer)?.name} — Customer Analysis`
+      : 'Customer Analysis — Select a customer to begin';
+    if (!currentCustomer) showCustEmpty();
+  }
+}
+
+function showCustEmpty() {
+  Object.values(custCharts).forEach(c=>{try{c.destroy();}catch(e){}});
+  custCharts = {};
+  document.getElementById('mainContent').innerHTML = `
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 24px;text-align:center;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:0.2;margin-bottom:12px;"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      <div style="font-size:14px;font-weight:500;color:var(--text-mid);">Select a customer to view their analysis</div>
+      <div style="font-size:12px;color:var(--text-light);margin-top:5px;">Frequency score · Product heatmap · Issue pattern · Recommendations</div>
+    </div>`;
+}
+
+function toggleCDD() {
+  cddOpen = !cddOpen;
+  document.getElementById('cddPanel').style.display = cddOpen ? 'block' : 'none';
+  document.getElementById('cddCaret').classList.toggle('open', cddOpen);
+  document.getElementById('cddTrigger').classList.toggle('open', cddOpen);
+  if (cddOpen) { buildCDDList(''); setTimeout(()=>document.getElementById('cddSearch').focus(),50); }
+}
+
+function filterCDD(q) { buildCDDList(q); }
+
+function buildCDDList(q) {
+  const lq = q.toLowerCase();
+  const list = document.getElementById('cddList');
+  const items = CUSTOMERS.filter(c => !lq || c.name.toLowerCase().includes(lq) || c.city.toLowerCase().includes(lq));
+  if (!items.length) { list.innerHTML='<div style="padding:20px;text-align:center;font-size:12px;color:var(--text-light);">No customers found</div>'; return; }
+  list.innerHTML = items.map(c => {
+    const hl = lq ? c.name.replace(new RegExp(`(${lq.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi'), '<mark class="hlt">$1</mark>') : c.name;
+    const riskCls = c.risk==='high'?'cr-high':c.risk==='med'?'cr-med':'cr-low';
+    const riskLabel = c.risk==='high'?'High':c.risk==='med'?'Medium':'Low';
+    return `<div class="cdd-item${currentCustomer===c.id?' sel':''}" onclick="selectCustomer('${c.id}')">
+      <div class="cdd-item-avatar" style="background:${c.avatarColor};">${c.initials}</div>
+      <div class="cdd-item-info">
+        <div class="cdd-item-name">${hl}</div>
+        <div class="cdd-item-sub">${c.city} · ${c.productCount} products · ${c.totalCases} cases (5 months)</div>
+      </div>
+      <div class="cdd-item-right">
+        <span class="cdd-risk ${riskCls}">${riskLabel} risk</span>
+        <span class="cdd-freq">${c.freqRate}/product/mo</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function selectCustomer(id) {
+  currentCustomer = id;
+  cddOpen = false;
+  document.getElementById('cddPanel').style.display='none';
+  document.getElementById('cddCaret').classList.remove('open');
+  document.getElementById('cddTrigger').classList.remove('open');
+  const c = CUSTOMERS.find(x=>x.id===id);
+  document.getElementById('cddIcon').textContent = c.initials;
+  document.getElementById('cddIcon').style.background = c.avatarColor;
+  document.getElementById('cddIcon').style.color = '#fff';
+  document.getElementById('cddIcon').style.border = 'none';
+  document.getElementById('cddName').textContent = c.name;
+  const rEl = document.getElementById('cddRisk');
+  rEl.textContent = c.risk==='high'?'High risk':c.risk==='med'?'Medium':'Low risk';
+  rEl.className = 'cdd-risk ' + (c.risk==='high'?'cr-high':c.risk==='med'?'cr-med':'cr-low');
+  rEl.style.display = 'inline';
+  document.getElementById('topbarTitle').textContent = `${c.name} — Customer Analysis`;
+  renderCustomer(id);
+}
+
+document.addEventListener('click', e => {
+  if (cddOpen && !document.getElementById('cddWrap').contains(e.target)) {
+    cddOpen=false;
+    document.getElementById('cddPanel').style.display='none';
+    document.getElementById('cddCaret').classList.remove('open');
+    document.getElementById('cddTrigger').classList.remove('open');
+  }
+});
+
+// ── RENDER CUSTOMER ANALYSIS ──────────────────────────────────────────────────
+function renderCustomer(id) {
+  Object.values(custCharts).forEach(c=>{try{c.destroy();}catch(e){}});
+  custCharts = {};
+  const c = CUSTOMERS.find(x=>x.id===id);
+  const totalByMonth = MONTHS.map((_,mi)=>c.byProduct.reduce((s,p)=>s+p.monthly[mi],0));
+  const cumTotal = totalByMonth.map((v,i,a)=>a.slice(0,i+1).reduce((s,x)=>s+x,0));
+  const riskCls = c.risk==='high'?'rb-red':c.risk==='med'?'rb-amber':'rb-green';
+  const patternLabel = {training:'Training required',electrical:'Site / electrical issue',calibration:'Calibration pattern',normal:'Normal range'}[c.pattern]||'';
+  const patternColor = {training:'#D97706',electrical:'#DC2626',calibration:'#1B3A8C',normal:'#059669'}[c.pattern];
+  const bannerCls = {red:'cb-red',amber:'cb-amber',green:'cb-green',blue:'cb-blue'}[c.insight.type]||'cb-amber';
+  const freqColor = c.freqRate>=3?'var(--red)':c.freqRate>=2?'var(--amber)':'var(--green)';
+  const freqBadge = c.freqRate>=3?'d-up':c.freqRate>=2?'d-warn':'d-dn';
+  const threshold = c.productCount;
+
+  // heatmap rows
+  const hmRows = c.byProduct.map(p => {
+    const mx = Math.max(...p.monthly);
+    const total = p.monthly.reduce((a,b)=>a+b,0);
+    const lastD = p.monthly[4]-p.monthly[3];
+    const allUp = p.monthly.every((v,i,a)=>i===0||v>=a[i-1]);
+    const tClass = allUp?'pt-up':lastD>0?'pt-up':lastD<0?'pt-dn':'pt-flat';
+    const tText  = allUp?'↑ all 5':'↑ +'+lastD;
+    const cells = p.monthly.map(v=>{
+      const r=parseInt(p.color.slice(1,3),16),g=parseInt(p.color.slice(3,5),16),b=parseInt(p.color.slice(5,7),16);
+      const bg=`rgba(${r},${g},${b},${(0.07+(v/Math.max(mx,1))*0.8).toFixed(2)})`;
+      return `<td class="phm-cell"><div class="phm-chip" style="background:${bg};color:${p.color};">${v}</div></td>`;
+    }).join('');
+    return `<tr>
+      <td><div class="phm-label">${p.name}<span class="psub">${p.code}</span></div></td>
+      ${cells}
+      <td class="phm-total">${total}</td>
+      <td style="text-align:center;"><span class="phm-trend ${tClass}">${allUp?'↑ all 5':lastD>0?'↑ +'+lastD:lastD<0?'↓ '+lastD:'— flat'}</span></td>
+    </tr>`;
+  }).join('');
+
+  // why rows
+  const whyRows = c.whyBreakdown.map(w=>`
+    <div class="why-bar-row">
+      <div class="why-dot" style="background:${w.color};"></div>
+      <div class="why-label">${w.name}</div>
+      <div class="why-bar-wrap"><div class="why-bar-fill" style="width:${w.pct}%;background:${w.color};"></div></div>
+      <div class="why-pct">${w.pct}%</div>
+    </div>`).join('');
+
+  // rec rows
+  const recRows = c.recommendations.map(r=>{
+    const acCls = {train:'ac-train',site:'ac-site',pm:'ac-pm',watch:'ac-watch'}[r.action]||'ac-watch';
+    const acLabel = {train:'Training',site:'Site audit',pm:'Schedule PM',watch:'Monitor'}[r.action]||'Monitor';
+    const tClass = r.trend==='up'?'pt-up':r.trend==='dn'?'pt-dn':'pt-flat';
+    const tText  = r.trend==='up'?'↑':r.trend==='dn'?'↓':'—';
+    return `<tr>
+      <td style="font-weight:500;">${r.product}</td>
+      <td style="font-family:'DM Mono',monospace;">${r.freq}</td>
+      <td><span class="phm-trend ${tClass}">${tText}</span></td>
+      <td><span class="action-chip ${acCls}">${acLabel}</span></td>
+      <td style="color:var(--text-mid);">${r.text}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('mainContent').innerHTML = `
+    <div class="cust-banner ${bannerCls}">
+      <div class="cb-icon">${c.insight.type==='red'?'🔴':c.insight.type==='green'?'✅':'⚠️'}</div>
+      <div class="cb-text">${c.insight.msg}<br><span class="rec" style="margin-top:8px;display:inline-flex;">View root cause detail →</span></div>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi-card"><div class="kpi-accent" style="background:${c.avatarColor};"></div>
+        <div class="kl">Total cases (5 months)</div><div class="kv">${c.totalCases}</div>
+        <div class="ks">${c.productCount} products · ${c.city}</div>
+        <div class="kpi-delta ${freqBadge}">${c.freqRate} per product/mo</div>
+      </div>
+      <div class="kpi-card"><div class="kpi-accent" style="background:${freqColor};"></div>
+        <div class="kl">Frequency score</div>
+        <div class="kv" style="color:${freqColor};">${c.freqRate}</div>
+        <div class="ks">Cases ÷ products ÷ months</div>
+        <div class="kpi-delta ${freqBadge}">${c.freqRate>=2?'⚠ Above threshold':'✓ Within range'}</div>
+      </div>
+      <div class="kpi-card"><div class="kpi-accent" style="background:var(--purple);"></div>
+        <div class="kl">Products owned</div><div class="kv">${c.productCount}</div>
+        <div class="ks">${c.products.slice(0,3).join(', ')}${c.productCount>3?'…':''}</div>
+        <div class="kpi-delta" style="background:var(--purple-pale);color:var(--purple);">${c.monthly[4]} cases this month</div>
+      </div>
+      <div class="kpi-card"><div class="kpi-accent" style="background:${patternColor};"></div>
+        <div class="kl">AI pattern diagnosis</div>
+        <div class="kv" style="font-size:16px;line-height:1.2;">${patternLabel}</div>
+        <div class="ks">Based on issue category mix</div>
+        <div class="kpi-delta ${riskCls}">${c.risk==='high'?'High':c.risk==='med'?'Medium':'Low'} risk</div>
+      </div>
+    </div>
+
+    <div class="section-hd"><div class="s-title">Product activity heatmap — which products are generating calls?</div><div class="s-line"></div></div>
+    <div class="card chart-row-full">
+      <div class="card-head">
+        <div class="card-head-icon" style="background:#FEF3C7;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></div>
+        <div><div class="card-title">Case frequency by product — ${c.name}</div>
+        <div class="card-sub">Darker cells = more cases that month · a row that stays dark = a chronic problem product</div></div>
+      </div>
+      <div style="padding:14px 18px;overflow-x:auto;">
+        <table class="prod-hm-table">
+          <thead><tr>
+            <th class="phm-th pc">Product</th>
+            ${MONTHS.map(m=>`<th class="phm-th">${m}</th>`).join('')}
+            <th class="phm-th">Total</th><th class="phm-th">Trend</th>
+          </tr></thead>
+          <tbody>${hmRows}</tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section-hd"><div class="s-title">Why are they calling? &amp; Volume trend</div><div class="s-line"></div></div>
+    <div class="why-grid">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-head-icon" style="background:var(--purple-pale);"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div>
+          <div><div class="card-title">Issue category breakdown</div><div class="card-sub">What type of issues is this customer raising?</div></div>
+        </div>
+        <div class="chart-body">${whyRows}</div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <div class="card-head-icon" style="background:var(--blue-pale);"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1B3A8C" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg></div>
+          <div><div class="card-title">Monthly case volume</div><div class="card-sub">Total cases vs threshold (= products owned)</div></div>
+        </div>
+        <div class="chart-body"><canvas id="custVolChart" height="180"></canvas></div>
+      </div>
+    </div>
+
+    <div class="section-hd"><div class="s-title">Recommendations — by product</div><div class="s-line"></div></div>
+    <div class="card" style="margin-bottom:20px;">
+      <table class="rec-table">
+        <thead><tr><th>Product</th><th>Frequency</th><th>Trend</th><th>Action</th><th>Recommendation</th></tr></thead>
+        <tbody>${recRows}</tbody>
+      </table>
+    </div>
+  `;
+
+  requestAnimationFrame(()=>{
+    const ctx = document.getElementById('custVolChart').getContext('2d');
+    custCharts.vol = new Chart(ctx, {
+      type:'bar',
+      data:{
+        labels:MONTHS,
+        datasets:[
+          {label:'Cases this month',data:totalByMonth,backgroundColor:`${c.avatarColor}CC`,borderColor:c.avatarColor,borderWidth:0,borderRadius:4},
+          {label:`Threshold (${threshold} products)`,data:MONTHS.map(()=>threshold),type:'line',borderColor:'#DC2626',borderWidth:1.5,borderDash:[4,3],pointRadius:0,fill:false,tension:0},
+        ]
+      },
+      options:{...CHART_DEFAULTS,
+        plugins:{...CHART_DEFAULTS.plugins,legend:{display:true,position:'bottom',labels:{font:{family:'"DM Sans"',size:10},boxWidth:8,padding:10}}},
+        scales:{x:{...CHART_DEFAULTS.scales.x},y:{...CHART_DEFAULTS.scales.y,title:{display:true,text:'Cases',font:{family:'"DM Sans"',size:10}}}}
+      }
+    });
+  });
+}
+
+</script>
+</body>
+</html>

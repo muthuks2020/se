@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Service Excellence — Appasamy Associates</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0F2250;
+    --navy-mid: #1B3A8C;
+    --navy-light: #2347A8;
+    --blue: #1B3A8C;
+    --blue-light: #2F5DC2;
+    --blue-pale: #EEF2FB;
+    --blue-border: #C0CEEE;
+    --teal: #0D9488;
+    --teal-pale: #F0FDFA;
+    --green: #059669;
+    --green-pale: #ECFDF5;
+    --amber: #D97706;
+    --amber-pale: #FFFBEB;
+    --red: #DC2626;
+    --red-pale: #FEF2F2;
+    --purple: #7C3AED;
+    --purple-pale: #F5F3FF;
+    --text: #0F172A;
+    --text-mid: #475569;
+    --text-light: #94A3B8;
+    --border: #E2E8F0;
+    --border-mid: #CBD5E1;
+    --bg: #F1F5F9;
+    --card: #FFFFFF;
+    --radius: 10px;
+    --radius-lg: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; display: flex; height: 100vh; overflow: hidden; }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 220px; flex-shrink: 0;
+    background: var(--navy);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .sidebar-logo {
+    padding: 20px 18px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .logo-mark {
+    display: flex; align-items: center; gap: 9px;
+  }
+  .logo-eye {
+    width: 32px; height: 32px;
+    background: var(--blue);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .logo-eye svg { width: 18px; height: 18px; }
+  .logo-text { color: #fff; }
+  .logo-text .brand { font-size: 12px; font-weight: 600; letter-spacing: 0.02em; line-height: 1; }
+  .logo-text .sub { font-size: 10px; color: rgba(255,255,255,0.45); margin-top: 2px; letter-spacing: 0.03em; }
+
+  .sidebar-section { padding: 16px 12px 6px; }
+  .sidebar-section-label {
+    font-size: 9px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+    color: rgba(255,255,255,0.3); padding: 0 6px; margin-bottom: 6px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 9px;
+    padding: 8px 10px; border-radius: 7px;
+    color: rgba(255,255,255,0.6); font-size: 13px; font-weight: 400;
+    cursor: pointer; transition: all 0.15s; margin-bottom: 1px;
+    text-decoration: none;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.9); }
+  .nav-item.active { background: var(--blue); color: #fff; font-weight: 500; }
+  .nav-item svg { width: 15px; height: 15px; flex-shrink: 0; opacity: 0.85; }
+  .nav-badge {
+    margin-left: auto; font-size: 10px; font-weight: 600;
+    background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.8);
+    padding: 1px 6px; border-radius: 10px;
+  }
+  .nav-badge.alert { background: #DC2626; color: #fff; }
+
+  .equipment-list { padding: 0 12px; }
+  .equip-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 10px; border-radius: 7px; cursor: pointer;
+    transition: all 0.15s; margin-bottom: 1px;
+    color: rgba(255,255,255,0.55); font-size: 12px;
+  }
+  .equip-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.85); }
+  .equip-item.active { background: rgba(26,86,219,0.25); color: #93C5FD; }
+  .equip-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .equip-count { margin-left: auto; font-size: 10px; color: rgba(255,255,255,0.3); font-family: 'DM Mono', monospace; }
+
+  .sidebar-footer {
+    margin-top: auto; padding: 12px 18px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--blue-light); display: flex; align-items: center;
+    justify-content: center; font-size: 11px; font-weight: 600; color: #fff; flex-shrink: 0;
+  }
+  .avatar-info { flex: 1; min-width: 0; }
+  .avatar-name { font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.85); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .avatar-role { font-size: 10px; color: rgba(255,255,255,0.4); }
+
+  /* ── MAIN ── */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+  .topbar {
+    background: #fff; border-bottom: 1px solid var(--border);
+    padding: 0 24px; height: 56px;
+    display: flex; align-items: center; gap: 16px; flex-shrink: 0;
+  }
+  .topbar-title { font-size: 15px; font-weight: 600; color: var(--text); }
+  .topbar-breadcrumb { font-size: 12px; color: var(--text-light); }
+  .topbar-breadcrumb span { color: var(--text-mid); }
+  .topbar-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+  .btn-sm {
+    padding: 6px 14px; border-radius: 7px; font-size: 12px; font-weight: 500;
+    cursor: pointer; border: 1px solid var(--border); background: #fff;
+    color: var(--text-mid); font-family: 'DM Sans', sans-serif; transition: all 0.15s;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .btn-sm:hover { border-color: var(--border-mid); background: var(--bg); }
+  .btn-sm.primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+  .btn-sm.primary:hover { background: #1D4ED8; }
+  .filter-bar {
+    background: #fff; border-bottom: 1px solid var(--border);
+    padding: 0 24px; height: 44px;
+    display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+  }
+  .filter-label { font-size: 11px; color: var(--text-light); margin-right: 4px; font-weight: 500; }
+  .pill {
+    padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 500;
+    cursor: pointer; border: 1px solid var(--border); color: var(--text-mid);
+    background: #fff; transition: all 0.15s;
+  }
+  .pill:hover { border-color: var(--blue); color: var(--blue); }
+  .pill.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+  .filter-sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+  .date-range {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 11px; color: var(--text-mid);
+    padding: 4px 10px; border: 1px solid var(--border); border-radius: 7px;
+    background: #fff;
+  }
+  .date-range svg { width: 12px; height: 12px; color: var(--text-light); }
+  .ai-badge {
+    margin-left: auto; display: flex; align-items: center; gap: 5px;
+    font-size: 11px; font-weight: 500; color: var(--purple);
+    background: var(--purple-pale); padding: 3px 10px; border-radius: 20px;
+    border: 1px solid #DDD6FE;
+  }
+  .ai-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--purple); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(1.3)} }
+
+  /* ── CONTENT ── */
+  .content { flex: 1; overflow-y: auto; padding: 20px 24px; }
+
+  /* KPI STRIP */
+  .kpi-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 16px; }
+  .kpi-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 14px 14px 12px; position: relative; overflow: hidden;
+    transition: box-shadow 0.15s;
+  }
+  .kpi-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+  .kpi-card .kpi-label { font-size: 10px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-light); margin-bottom: 6px; }
+  .kpi-card .kpi-val { font-size: 24px; font-weight: 600; color: var(--text); line-height: 1; font-family: 'DM Mono', monospace; }
+  .kpi-card .kpi-sub { font-size: 11px; color: var(--text-light); margin-top: 4px; }
+  .kpi-card .kpi-delta {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px; margin-top: 4px;
+  }
+  .delta-up { color: var(--green); background: var(--green-pale); }
+  .delta-warn { color: var(--amber); background: var(--amber-pale); }
+  .delta-bad { color: var(--red); background: var(--red-pale); }
+  .kpi-accent { position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: var(--radius) var(--radius) 0 0; }
+  .kpi-sparkline { margin-top: 8px; }
+
+  /* MAIN GRID */
+  .main-grid { display: grid; grid-template-columns: 1fr 340px; gap: 14px; margin-bottom: 14px; }
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .card-head {
+    padding: 14px 18px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .card-head-icon {
+    width: 28px; height: 28px; border-radius: 7px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .card-title { font-size: 13px; font-weight: 600; color: var(--text); }
+  .card-sub { font-size: 11px; color: var(--text-light); margin-top: 1px; }
+  .card-action {
+    margin-left: auto; font-size: 11px; font-weight: 500;
+    color: var(--blue); cursor: pointer; padding: 4px 8px;
+    border-radius: 5px; transition: background 0.15s;
+  }
+  .card-action:hover { background: var(--blue-pale); }
+
+  /* DIAGNOSIS CODES */
+  .diag-grid { padding: 14px 18px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .diag-chip {
+    border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px;
+    cursor: pointer; transition: all 0.15s; position: relative;
+  }
+  .diag-chip:hover { border-color: var(--blue); background: var(--blue-pale); }
+  .diag-chip.selected { border-color: var(--blue); background: var(--blue-pale); box-shadow: 0 0 0 3px rgba(26,86,219,0.1); }
+  .diag-chip .code { font-size: 10px; font-weight: 700; letter-spacing: 0.05em; color: var(--blue); font-family: 'DM Mono', monospace; }
+  .diag-chip .name { font-size: 11px; font-weight: 500; color: var(--text); margin: 2px 0 6px; line-height: 1.3; }
+  .diag-bar-bg { height: 3px; background: var(--border); border-radius: 2px; }
+  .diag-bar-fill { height: 3px; border-radius: 2px; transition: width 0.4s ease; }
+  .diag-meta { display: flex; justify-content: space-between; margin-top: 4px; }
+  .diag-meta span { font-size: 10px; color: var(--text-light); }
+  .diag-meta .pct { font-weight: 600; color: var(--text-mid); }
+
+  /* DRILL PANEL */
+  .drill-panel { padding: 0; }
+  .drill-empty {
+    padding: 32px 18px; text-align: center;
+    color: var(--text-light); font-size: 12px;
+  }
+  .drill-empty svg { width: 32px; height: 32px; margin: 0 auto 10px; display: block; opacity: 0.3; }
+  .drill-content { display: none; }
+  .drill-header { padding: 14px 18px; background: var(--blue-pale); border-bottom: 1px solid var(--blue-border); }
+  .drill-header .code { font-size: 10px; font-weight: 700; color: var(--blue); font-family: 'DM Mono', monospace; letter-spacing: 0.06em; }
+  .drill-header .name { font-size: 14px; font-weight: 600; color: var(--navy); margin-top: 2px; }
+  .drill-header .count { font-size: 12px; color: var(--text-mid); margin-top: 2px; }
+  .rc-list { padding: 12px 18px; }
+  .rc-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .rc-item:last-child { border-bottom: none; }
+  .rc-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .rc-info { flex: 1; min-width: 0; }
+  .rc-name { font-size: 12px; font-weight: 500; color: var(--text); }
+  .rc-tag { font-size: 10px; color: var(--text-light); }
+  .rc-count { font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; color: var(--text-mid); }
+  .rc-bar-wrap { width: 60px; }
+  .rc-bar-bg { height: 4px; background: var(--border); border-radius: 2px; }
+  .rc-bar-fill { height: 4px; border-radius: 2px; }
+
+  /* AI INSIGHT CARDS */
+  .insight-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 14px; }
+  .insight-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 14px 16px; transition: box-shadow 0.15s;
+  }
+  .insight-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+  .insight-card .ic-head { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+  .ic-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .ic-title { font-size: 12px; font-weight: 600; color: var(--text); line-height: 1.3; }
+  .ic-body { font-size: 11px; color: var(--text-mid); line-height: 1.6; }
+  .ic-action { margin-top: 10px; font-size: 11px; font-weight: 600; color: var(--blue); cursor: pointer; }
+  .ic-action:hover { text-decoration: underline; }
+  .ic-border-blue { border-top: 3px solid var(--blue); }
+  .ic-border-amber { border-top: 3px solid var(--amber); }
+  .ic-border-teal { border-top: 3px solid var(--teal); }
+
+  /* AGE × FTFR GRID */
+  .bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .age-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .age-table th { padding: 8px 12px; text-align: left; font-size: 10px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-light); background: var(--bg); border-bottom: 1px solid var(--border); }
+  .age-table td { padding: 9px 12px; border-bottom: 1px solid var(--border); }
+  .age-table tr:last-child td { border-bottom: none; }
+  .age-table .age-band { font-weight: 500; color: var(--text); }
+  .age-table .num { font-family: 'DM Mono', monospace; color: var(--text-mid); }
+  .ftfr-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; font-family: 'DM Mono', monospace;
+  }
+  .ftfr-green { background: var(--green-pale); color: var(--green); }
+  .ftfr-amber { background: var(--amber-pale); color: var(--amber); }
+  .ftfr-red { background: var(--red-pale); color: var(--red); }
+  .progress-bar { width: 60px; height: 4px; background: var(--border); border-radius: 2px; display: inline-block; vertical-align: middle; margin-right: 6px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 2px; }
+
+  /* TECH TABLE */
+  .tech-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .tech-table th { padding: 8px 12px; text-align: left; font-size: 10px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-light); background: var(--bg); border-bottom: 1px solid var(--border); }
+  .tech-table td { padding: 9px 12px; border-bottom: 1px solid var(--border); }
+  .tech-table tr:last-child td { border-bottom: none; }
+  .tech-avatar { width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: #fff; margin-right: 7px; vertical-align: middle; }
+  .tag { display: inline-flex; align-items: center; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 500; }
+  .tag-blue { background: var(--blue-pale); color: var(--blue); }
+  .tag-green { background: var(--green-pale); color: var(--green); }
+  .tag-amber { background: var(--amber-pale); color: var(--amber); }
+
+  /* SCROLLBAR */
+  .content::-webkit-scrollbar { width: 4px; }
+  .content::-webkit-scrollbar-track { background: transparent; }
+  .content::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 4px; }
+
+  /* SECTION HEADER */
+  .section-hd { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .section-hd .s-title { font-size: 12px; font-weight: 600; color: var(--text-mid); }
+  .section-hd .s-line { flex: 1; height: 1px; background: var(--border); }
+
+  /* TOOLTIP BADGE */
+  .new-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 9px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; background: #FEF3C7; color: #92400E; padding: 1px 5px; border-radius: 3px; margin-left: 5px; }
+
+  /* PARTS INDICATOR */
+  .parts-row { display: flex; align-items: center; gap: 10px; padding: 10px 18px; border-top: 1px solid var(--border); }
+  .parts-label { font-size: 11px; color: var(--text-light); }
+  .parts-bar-bg { flex: 1; height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; }
+  .parts-bar-fill { height: 100%; background: linear-gradient(90deg, var(--blue) 0%, var(--teal) 100%); border-radius: 3px; }
+  .parts-val { font-size: 11px; font-weight: 600; color: var(--text-mid); font-family: 'DM Mono', monospace; min-width: 36px; text-align: right; }
+
+  .topbar-search { position: relative; flex: 1; max-width: 380px; margin: 0 16px; }
+  .search-wrap {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 0 12px; height: 36px; transition: all 0.15s;
+  }
+  .search-wrap:focus-within {
+    background: #fff; border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(27,58,140,0.1);
+  }
+  .search-icon { color: var(--text-light); flex-shrink: 0; }
+  .search-input {
+    flex: 1; border: none; background: transparent; outline: none;
+    font-family: "DM Sans", sans-serif; font-size: 13px; color: var(--text); min-width: 0;
+  }
+  .search-input::placeholder { color: var(--text-light); }
+  .search-kbd {
+    font-size: 10px; font-family: "DM Mono", monospace;
+    color: var(--text-light); background: var(--border);
+    padding: 1px 5px; border-radius: 4px; border: 1px solid var(--border-mid);
+    flex-shrink: 0; white-space: nowrap;
+  }
+  .search-dropdown {
+    display: none; position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+    background: #fff; border: 1px solid var(--border);
+    border-radius: 10px; padding: 8px 6px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1); z-index: 999; max-height: 340px; overflow-y: auto;
+  }
+  .search-dropdown.open { display: block; }
+  .sd-section-label {
+    font-size: 9px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase;
+    color: var(--text-light); padding: 4px 10px; margin-bottom: 2px;
+  }
+  .sd-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 7px 10px; border-radius: 7px; cursor: pointer; transition: background 0.1s;
+  }
+  .sd-item:hover { background: var(--bg); }
+  .sd-item .sd-code { font-size: 11px; font-weight: 700; font-family: "DM Mono", monospace; color: var(--blue); min-width: 40px; }
+  .sd-item .sd-name { font-size: 12px; color: var(--text); flex: 1; }
+  .sd-item .sd-meta { font-size: 11px; color: var(--text-light); }
+  .sd-item .sd-icon { width: 22px; height: 22px; border-radius: 5px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .sd-empty { padding: 16px; text-align: center; font-size: 12px; color: var(--text-light); }
+  mark.search-highlight { background: #FEF9C3; border-radius: 2px; font-style: normal; }
+
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-wrap"><img src="appasamy-logo.png" alt="Appasamy Associates" style="width:140px;display:block;" /></div>
+    <div style="font-size:9px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-top:6px;padding-left:2px;">Service Excellence Platform</div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Analytics</div>
+    <a class="nav-item active" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </a>
+    <a class="nav-item" href="appasamy-root-cause.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      Root Causes
+      <span class="nav-badge">79</span>
+    </a>
+    <a class="nav-item" href="appasamy-trends.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      Trend Analysis
+      <span class="new-badge">New</span>
+    </a>
+    <a class="nav-item" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Technicians
+      <span class="new-badge">New</span>
+    </a>
+    <a class="nav-item" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/></svg>
+      Equipment Health
+      <span class="new-badge">New</span>
+    </a>
+    <a class="nav-item" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Alerts
+      <span class="nav-badge alert">3</span>
+    </a>
+  </div>
+
+  <div class="sidebar-section" style="margin-top:4px;">
+    <div class="sidebar-section-label">Equipment</div>
+  </div>
+  <div class="equipment-list">
+    <div class="equip-item active">
+      <div class="equip-dot" style="background:#3B82F6;"></div> YAG Laser <span class="equip-count">87</span>
+    </div>
+    <div class="equip-item">
+      <div class="equip-dot" style="background:#10B981;"></div> B-Scan <span class="equip-count">63</span>
+    </div>
+    <div class="equip-item">
+      <div class="equip-dot" style="background:#F59E0B;"></div> Green Laser <span class="equip-count">41</span>
+    </div>
+    <div class="equip-item">
+      <div class="equip-dot" style="background:#8B5CF6;"></div> Phaco System <span class="equip-count">38</span>
+    </div>
+    <div class="equip-item">
+      <div class="equip-dot" style="background:#EF4444;"></div> Slit Lamp <span class="equip-count">29</span>
+    </div>
+    <div class="equip-item">
+      <div class="equip-dot" style="background:#06B6D4;"></div> Tonometer <span class="equip-count">22</span>
+    </div>
+    <div class="equip-item" style="color:rgba(255,255,255,0.3);font-size:11px;padding:6px 10px;">
+      + 6 more equipment types
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="avatar">MB</div>
+    <div class="avatar-info">
+      <div class="avatar-name">Muthu Balakrishnan</div>
+      <div class="avatar-role">Service Manager</div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div>
+      <div class="topbar-breadcrumb">Analytics / <span>YAG Laser</span></div>
+      <div class="topbar-title">YAG Laser — Equipment Analytics</div>
+    </div>
+    <div class="topbar-search">
+      <div class="search-wrap" id="searchWrap">
+        <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="globalSearch" class="search-input" placeholder="Search cases, codes, technicians…" oninput="handleSearch(this.value)" onfocus="showDropdown()" onblur="setTimeout(hideDropdown,180)" autocomplete="off" />
+        <kbd class="search-kbd">⌘K</kbd>
+      </div>
+      <div class="search-dropdown" id="searchDropdown">
+        <div class="sd-section-label">Diagnosis codes</div>
+        <div id="sdCodes"></div>
+        <div class="sd-section-label" style="margin-top:8px;">Technicians</div>
+        <div id="sdTechs"></div>
+        <div class="sd-section-label" style="margin-top:8px;">Quick actions</div>
+        <div id="sdActions"></div>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn-sm">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Export PDF
+      </button>
+      <button class="btn-sm primary">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.18a2 2 0 012-2.18h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L9.91 14a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 20.92z"/></svg>
+        Share Report
+      </button>
+    </div>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar">
+    <span class="filter-label">Quick filters:</span>
+    <div class="pill">Last 7 days</div>
+    <div class="pill active">Last 30 days</div>
+    <div class="pill">Last 90 days</div>
+    <div class="filter-sep"></div>
+    <div class="date-range">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      28/04/2026 → 28/05/2026
+    </div>
+    <div class="date-range" style="margin-left:6px;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      All Ages
+    </div>
+    <div class="ai-badge">
+      <div class="ai-dot"></div>
+      AI analysis live · Last run 28/05 02:01
+    </div>
+  </div>
+
+  <!-- SCROLLABLE CONTENT -->
+  <div class="content">
+
+    <!-- KPI ROW -->
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-accent" style="background:var(--blue);"></div>
+        <div class="kpi-label">Total Cases</div>
+        <div class="kpi-val">87</div>
+        <div class="kpi-sub">7 WIP · 80 closed</div>
+        <div class="kpi-sparkline">
+          <svg width="100%" height="24" viewBox="0 0 100 24">
+            <polyline fill="none" stroke="#BFDBFE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" points="0,18 15,14 30,16 45,10 60,12 75,8 90,6 100,4"/>
+          </svg>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-accent" style="background:var(--green);"></div>
+        <div class="kpi-label">Avg Resolution</div>
+        <div class="kpi-val">2.4<span style="font-size:14px;color:var(--text-light);"> d</span></div>
+        <div class="kpi-delta delta-up">↓ 0.6d vs prev</div>
+        <div class="kpi-sparkline">
+          <svg width="100%" height="24" viewBox="0 0 100 24">
+            <polyline fill="none" stroke="#A7F3D0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" points="0,20 15,18 30,22 45,16 60,14 75,10 90,8 100,6"/>
+          </svg>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-accent" style="background:#F59E0B;"></div>
+        <div class="kpi-label">First-Time Fix <span class="new-badge">New</span></div>
+        <div class="kpi-val">68<span style="font-size:14px;color:var(--text-light);">%</span></div>
+        <div class="kpi-delta delta-warn">⚠ Target: 80%</div>
+        <div class="kpi-sparkline">
+          <svg width="100%" height="24" viewBox="0 0 100 24">
+            <polyline fill="none" stroke="#FDE68A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" points="0,16 15,18 30,14 45,16 60,12 75,14 90,10 100,8"/>
+          </svg>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-accent" style="background:var(--red);"></div>
+        <div class="kpi-label">Repeat Visits <span class="new-badge">New</span></div>
+        <div class="kpi-val">14</div>
+        <div class="kpi-delta delta-bad">↑ 3 vs prev</div>
+        <div class="kpi-sparkline">
+          <svg width="100%" height="24" viewBox="0 0 100 24">
+            <polyline fill="none" stroke="#FECACA" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" points="0,20 15,20 30,18 45,18 60,16 75,14 90,14 100,10"/>
+          </svg>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-accent" style="background:var(--teal);"></div>
+        <div class="kpi-label">Parts Consumed</div>
+        <div class="kpi-val">10</div>
+        <div class="kpi-sub">12.5% of closed</div>
+        <div class="kpi-sparkline">
+          <svg width="100%" height="24" viewBox="0 0 100 24">
+            <polyline fill="none" stroke="#99F6E4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" points="0,20 15,20 30,18 45,18 60,16 75,16 90,14 100,14"/>
+          </svg>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-accent" style="background:var(--purple);"></div>
+        <div class="kpi-label">AI Analysed</div>
+        <div class="kpi-val">79</div>
+        <div class="kpi-sub">98.8% · 1 pending</div>
+        <div class="kpi-sparkline">
+          <svg width="100%" height="24" viewBox="0 0 100 24">
+            <polyline fill="none" stroke="#DDD6FE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" points="0,22 15,20 30,18 45,14 60,10 75,6 90,4 100,2"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI INSIGHTS -->
+    <div class="section-hd">
+      <div class="s-title">AI Insights</div>
+      <div class="s-line"></div>
+    </div>
+    <div class="insight-row">
+      <div class="insight-card ic-border-amber">
+        <div class="ic-head">
+          <div class="ic-icon" style="background:var(--amber-pale);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <div class="ic-title">New installs driving 56% of failures</div>
+        </div>
+        <div class="ic-body">Devices under 1 year old account for 45 of 80 closed cases. Top root cause: post-installation calibration drift. A proactive 90-day calibration check could reduce this cluster significantly.</div>
+        <div class="ic-action">→ Schedule pre-emptive check programme</div>
+      </div>
+      <div class="insight-card ic-border-blue">
+        <div class="ic-head">
+          <div class="ic-icon" style="background:var(--blue-pale);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A56DB" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div class="ic-title">L107 Aiming Beam up 23% this month</div>
+        </div>
+        <div class="ic-body">Aiming beam cases rose from 8 → 13 (28/04–28/05). Pattern suggests a possible batch alignment issue in recent shipments. Cross-check serial number ranges for common manufacturing batch.</div>
+        <div class="ic-action">→ <a href='appasamy-root-cause.html' style='color:var(--blue);text-decoration:none;font-weight:600;'>View full root cause analysis</a></div>
+      </div>
+      <div class="insight-card ic-border-teal">
+        <div class="ic-head">
+          <div class="ic-icon" style="background:var(--teal-pale);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0D9488" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+          </div>
+          <div class="ic-title">FTFR below target — 3 repeat visits this week</div>
+        </div>
+        <div class="ic-body">First-time fix rate at 68% vs 80% target. 3 cases returned within 14 days on same device. Root cause: L803 base rail not fully resolved on first visit. Consider depot-level repair protocol.</div>
+        <div class="ic-action">→ View repeat visit cases</div>
+      </div>
+    </div>
+
+    <!-- DIAGNOSIS + DRILL-DOWN -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <div class="section-hd" style="margin:0;flex:1;">
+        <div class="s-title">Diagnosis codes — click any code to see root cause breakdown</div>
+        <div class="s-line"></div>
+      </div>
+      <a href="appasamy-root-cause.html" style="display:inline-flex;align-items:center;gap:6px;margin-left:16px;padding:6px 14px;background:var(--blue);color:#fff;border-radius:7px;font-size:12px;font-weight:500;text-decoration:none;white-space:nowrap;flex-shrink:0;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        Full Root Cause Analysis &rarr;
+      </a>
+    </div>
+    <div style="display:none;" class="section-hd">
+      <div class="s-title">Diagnosis codes — click any code to see root cause breakdown</div>
+      <div class="s-line"></div>
+    </div>
+    <div class="main-grid">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-head-icon" style="background:#EFF6FF;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1A56DB" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div>
+            <div class="card-title">Diagnosis code breakdown</div>
+            <div class="card-sub">75 work orders · 80 closed cases · sorted by count</div>
+          </div>
+          <div class="card-action">View all</div>
+        </div>
+        <div class="diag-grid" id="diagGrid">
+          <!-- chips rendered by JS -->
+        </div>
+        <div class="parts-row">
+          <div class="parts-label">Parts consumed cases</div>
+          <div class="parts-bar-bg"><div class="parts-bar-fill" style="width:12.5%;"></div></div>
+          <div class="parts-val">10 / 80</div>
+          <span style="font-size:10px;color:var(--text-light);margin-left:4px;">12.5%</span>
+        </div>
+      </div>
+
+      <!-- DRILL PANEL -->
+      <div class="card" id="drillCard">
+        <div class="card-head">
+          <div class="card-head-icon" style="background:#F5F3FF;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </div>
+          <div>
+            <div class="card-title">Root cause drill-down</div>
+            <div class="card-sub">AI classification · click a code</div>
+          </div>
+        </div>
+        <div class="drill-empty" id="drillEmpty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Select a diagnosis code to see its root cause breakdown
+        </div>
+        <div class="drill-content" id="drillContent">
+          <div class="drill-header" id="drillHeader"></div>
+          <div class="rc-list" id="rcList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AGE BREAKDOWN + TECHNICIAN -->
+    <div class="section-hd">
+      <div class="s-title">Equipment age & first-time fix rate</div>
+      <div class="s-line"></div>
+    </div>
+    <div class="bottom-grid">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-head-icon" style="background:#ECFDF5;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </div>
+          <div>
+            <div class="card-title">Age × FTFR analysis <span class="new-badge">New</span></div>
+            <div class="card-sub">Device age band vs first-time fix rate</div>
+          </div>
+        </div>
+        <div style="padding:12px;">
+          <table class="age-table">
+            <thead>
+              <tr>
+                <th>Age band</th>
+                <th>Cases</th>
+                <th>%</th>
+                <th>FTFR</th>
+                <th>Top cause</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="age-band">&lt; 1 Year</td>
+                <td class="num">45</td>
+                <td class="num">56.3%</td>
+                <td><div class="progress-bar"><div class="progress-fill" style="width:60%;background:#F59E0B;"></div></div><span class="ftfr-chip ftfr-amber">61%</span></td>
+                <td><span class="tag tag-amber">Calibration</span></td>
+              </tr>
+              <tr>
+                <td class="age-band">1–2 Years</td>
+                <td class="num">4</td>
+                <td class="num">5.0%</td>
+                <td><div class="progress-bar"><div class="progress-fill" style="width:85%;background:#059669;"></div></div><span class="ftfr-chip ftfr-green">86%</span></td>
+                <td><span class="tag tag-blue">Joystick</span></td>
+              </tr>
+              <tr>
+                <td class="age-band">2–4 Years</td>
+                <td class="num">14</td>
+                <td class="num">17.5%</td>
+                <td><div class="progress-bar"><div class="progress-fill" style="width:78%;background:#059669;"></div></div><span class="ftfr-chip ftfr-green">79%</span></td>
+                <td><span class="tag tag-amber">Base rail</span></td>
+              </tr>
+              <tr>
+                <td class="age-band">4–7 Years</td>
+                <td class="num">12</td>
+                <td class="num">15.0%</td>
+                <td><div class="progress-bar"><div class="progress-fill" style="width:72%;background:#F59E0B;"></div></div><span class="ftfr-chip ftfr-amber">72%</span></td>
+                <td><span class="tag tag-blue">E1 Error</span></td>
+              </tr>
+              <tr>
+                <td class="age-band">7+ Years</td>
+                <td class="num">5</td>
+                <td class="num">6.3%</td>
+                <td><div class="progress-bar"><div class="progress-fill" style="width:40%;background:#DC2626;"></div></div><span class="ftfr-chip ftfr-red">40%</span></td>
+                <td><span class="tag" style="background:#FEE2E2;color:#DC2626;">Energy level</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-head-icon" style="background:#F5F3FF;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          </div>
+          <div>
+            <div class="card-title">Technician performance <span class="new-badge">New</span></div>
+            <div class="card-sub">Last 30 days · YAG Laser cases</div>
+          </div>
+          <div class="card-action">View all</div>
+        </div>
+        <div style="padding:12px;">
+          <table class="tech-table">
+            <thead>
+              <tr>
+                <th>Technician</th>
+                <th>Cases</th>
+                <th>Avg days</th>
+                <th>FTFR</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div class="tech-avatar" style="background:#3B82F6;">RK</div>Rajesh K.</td>
+                <td class="num">22</td>
+                <td class="num">1.8</td>
+                <td><span class="ftfr-chip ftfr-green">86%</span></td>
+              </tr>
+              <tr>
+                <td><div class="tech-avatar" style="background:#8B5CF6;">SM</div>Suresh M.</td>
+                <td class="num">18</td>
+                <td class="num">2.1</td>
+                <td><span class="ftfr-chip ftfr-green">78%</span></td>
+              </tr>
+              <tr>
+                <td><div class="tech-avatar" style="background:#059669;">AP</div>Anand P.</td>
+                <td class="num">16</td>
+                <td class="num">3.2</td>
+                <td><span class="ftfr-chip ftfr-amber">62%</span></td>
+              </tr>
+              <tr>
+                <td><div class="tech-avatar" style="background:#D97706;">VN</div>Vikram N.</td>
+                <td class="num">14</td>
+                <td class="num">2.8</td>
+                <td><span class="ftfr-chip ftfr-amber">71%</span></td>
+              </tr>
+              <tr>
+                <td><div class="tech-avatar" style="background:#DC2626;">KS</div>Karan S.</td>
+                <td class="num">10</td>
+                <td class="num">4.1</td>
+                <td><span class="ftfr-chip ftfr-red">50%</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- BILLING + CASE TYPE ROW -->
+    <div class="section-hd">
+      <div class="s-title">Case breakdown</div>
+      <div class="s-line"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;">
+        <div style="font-size:10px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:var(--text-light);margin-bottom:6px;">Service cases</div>
+        <div style="font-size:26px;font-weight:600;color:var(--green);font-family:'DM Mono',monospace;">77</div>
+        <div style="font-size:11px;color:var(--text-light);margin-top:3px;">96.3% of closed</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;">
+        <div style="font-size:10px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:var(--text-light);margin-bottom:6px;">Billable</div>
+        <div style="font-size:26px;font-weight:600;color:var(--blue);font-family:'DM Mono',monospace;">64</div>
+        <div style="font-size:11px;color:var(--text-light);margin-top:3px;">80.0% · revenue-bearing</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;">
+        <div style="font-size:10px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:var(--text-light);margin-bottom:6px;">Warranty</div>
+        <div style="font-size:26px;font-weight:600;color:var(--amber);font-family:'DM Mono',monospace;">13</div>
+        <div style="font-size:11px;color:var(--text-light);margin-top:3px;">16.3% · cost to company</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;">
+        <div style="font-size:10px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:var(--text-light);margin-bottom:6px;">Demo + Install</div>
+        <div style="font-size:26px;font-weight:600;color:var(--text-mid);font-family:'DM Mono',monospace;">2</div>
+        <div style="font-size:11px;color:var(--text-light);margin-top:3px;">2.5% of closed</div>
+      </div>
+    </div>
+
+  </div><!-- end .content -->
+</main>
+
+<script>
+const diagCodes = [
+  { code:'L804', name:'Joystick trigger problem',    n:14, pct:18.7, color:'#1A56DB', rcs:[ {name:'Calibration/Settings',l:'L2',n:8,color:'#1A56DB'},{name:'Field part replacement',l:'L3',n:4,color:'#059669'},{name:'User training/error',l:'L2',n:2,color:'#F59E0B'} ] },
+  { code:'L107', name:'Aiming beam not centred',     n:13, pct:17.3, color:'#059669', rcs:[ {name:'Calibration/Settings',l:'L2',n:10,color:'#1A56DB'},{name:'Component drift',l:'L3',n:2,color:'#F59E0B'},{name:'Depot repair',l:'L4',n:1,color:'#DC2626'} ] },
+  { code:'L102', name:'Energy level problem',         n:10, pct:13.3, color:'#7C3AED', rcs:[ {name:'Component wear',l:'L3',n:6,color:'#F59E0B'},{name:'Calibration/Settings',l:'L2',n:3,color:'#1A56DB'},{name:'No fault found',l:'L1',n:1,color:'#94A3B8'} ] },
+  { code:'L803', name:'Base movement rail rack',      n:10, pct:13.3, color:'#EF4444', rcs:[ {name:'Preventive maintenance',l:'L2',n:7,color:'#0D9488'},{name:'Field part replacement',l:'L3',n:2,color:'#059669'},{name:'Depot repair',l:'L4',n:1,color:'#DC2626'} ] },
+  { code:'L708', name:'E1 error',                    n:7,  pct:9.3,  color:'#8B5CF6', rcs:[ {name:'Calibration/Settings',l:'L2',n:4,color:'#1A56DB'},{name:'Software/firmware',l:'L2',n:2,color:'#7C3AED'},{name:'No fault found',l:'L1',n:1,color:'#94A3B8'} ] },
+  { code:'L900', name:'After 25,000 shot calibration', n:6,pct:8.0, color:'#0D9488', rcs:[ {name:'Scheduled maintenance',l:'L2',n:5,color:'#0D9488'},{name:'Component check',l:'L3',n:1,color:'#F59E0B'} ] },
+  { code:'L800', name:'Motorised table up/down',      n:5,  pct:6.7,  color:'#F59E0B', rcs:[ {name:'Preventive maintenance',l:'L2',n:4,color:'#0D9488'},{name:'Motor failure',l:'L3',n:1,color:'#DC2626'} ] },
+  { code:'L705', name:'YAG board problem',            n:5,  pct:6.7,  color:'#06B6D4', rcs:[ {name:'Depot repair',l:'L4',n:3,color:'#DC2626'},{name:'Component replacement',l:'L3',n:2,color:'#059669'} ] },
+  { code:'L706', name:'Aiming beam knob problem',     n:3,  pct:4.0,  color:'#F97316', rcs:[ {name:'Calibration/Settings',l:'L2',n:2,color:'#1A56DB'},{name:'Physical damage',l:'L3',n:1,color:'#DC2626'} ] },
+];
+
+const grid = document.getElementById('diagGrid');
+let selected = null;
+
+diagCodes.forEach((d, i) => {
+  const chip = document.createElement('div');
+  chip.className = 'diag-chip';
+  chip.innerHTML = `
+    <div class="code">${d.code}</div>
+    <div class="name">${d.name}</div>
+    <div class="diag-bar-bg"><div class="diag-bar-fill" style="width:${d.pct}%;background:${d.color};"></div></div>
+    <div class="diag-meta"><span>${d.n} cases</span><span class="pct">${d.pct}%</span></div>
+  `;
+  chip.onclick = () => selectCode(d, chip);
+  grid.appendChild(chip);
+});
+
+function selectCode(d, el) {
+  document.querySelectorAll('.diag-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('drillEmpty').style.display = 'none';
+  document.getElementById('drillContent').style.display = 'block';
+  document.getElementById('drillHeader').innerHTML = `
+    <div class="code">${d.code}</div>
+    <div class="name">${d.name}</div>
+    <div class="count">${d.n} cases · AI root cause distribution</div>
+  `;
+  const list = document.getElementById('rcList');
+  list.innerHTML = '';
+  const max = Math.max(...d.rcs.map(r=>r.n));
+  d.rcs.forEach(r => {
+    const pct = Math.round(r.n / d.n * 100);
+    list.innerHTML += `
+      <div class="rc-item">
+        <div class="rc-dot" style="background:${r.color};"></div>
+        <div class="rc-info">
+          <div class="rc-name">${r.name}</div>
+          <div class="rc-tag">Level ${r.l}</div>
+        </div>
+        <div class="rc-bar-wrap">
+          <div class="rc-bar-bg"><div class="rc-bar-fill" style="width:${r.n/max*100}%;background:${r.color};"></div></div>
+        </div>
+        <div class="rc-count">${r.n} <span style="font-size:10px;color:var(--text-light);">(${pct}%)</span></div>
+      </div>
+    `;
+  });
+}
+
+const searchData = {
+  codes: [
+    {code:'L804',name:'Joystick trigger problem',n:14},
+    {code:'L107',name:'Aiming beam not centred',n:13},
+    {code:'L102',name:'Energy level problem',n:10},
+    {code:'L803',name:'Base movement rail rack',n:10},
+    {code:'L708',name:'E1 error',n:7},
+    {code:'L900',name:'After 25,000 shot calibration',n:6},
+    {code:'L800',name:'Motorised table up/down',n:5},
+    {code:'L705',name:'YAG board problem',n:5},
+    {code:'L706',name:'Aiming beam knob problem',n:3},
+    {code:'L701',name:'ON/OFF switch problem',n:2},
+  ],
+  techs: [
+    {name:'Rajesh K.',cases:22,ftfr:'86%'},
+    {name:'Suresh M.',cases:18,ftfr:'78%'},
+    {name:'Anand P.',cases:16,ftfr:'62%'},
+    {name:'Vikram N.',cases:14,ftfr:'71%'},
+    {name:'Karan S.',cases:10,ftfr:'50%'},
+  ],
+  actions: [
+    {label:'Export PDF report',icon:'📄'},
+    {label:'Schedule 90-day calibration check',icon:'📅'},
+    {label:'View repeat visit cases',icon:'🔁'},
+    {label:'Download technician CSV',icon:'📊'},
+  ]
+};
+
+function hl(text, q) {
+  if (!q) return text;
+  const re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')', 'gi');
+  return text.replace(re, '<mark class="search-highlight">$1</mark>');
+}
+
+function renderDropdown(q) {
+  const lq = q.toLowerCase();
+  const codes = searchData.codes.filter(c => !lq || c.code.toLowerCase().includes(lq) || c.name.toLowerCase().includes(lq));
+  const techs = searchData.techs.filter(t => !lq || t.name.toLowerCase().includes(lq));
+  const actions = searchData.actions.filter(a => !lq || a.label.toLowerCase().includes(lq));
+  document.getElementById('sdCodes').innerHTML = codes.length
+    ? codes.slice(0,5).map(c => `<div class="sd-item" onclick="jumpToCode('${c.code}')"><span class="sd-code">${hl(c.code,q)}</span><span class="sd-name">${hl(c.name,q)}</span><span class="sd-meta">${c.n} cases</span></div>`).join('')
+    : '<div class="sd-empty">No matching codes</div>';
+  document.getElementById('sdTechs').innerHTML = techs.length
+    ? techs.slice(0,4).map(t => `<div class="sd-item"><div class="sd-icon" style="background:#EEF2FB;font-size:12px;">👤</div><span class="sd-name">${hl(t.name,q)}</span><span class="sd-meta">${t.cases} cases · FTFR ${t.ftfr}</span></div>`).join('')
+    : '<div class="sd-empty">No matching technicians</div>';
+  document.getElementById('sdActions').innerHTML = actions.length
+    ? actions.slice(0,4).map(a => `<div class="sd-item"><span style="font-size:14px;">${a.icon}</span><span class="sd-name">${hl(a.label,q)}</span></div>`).join('')
+    : '';
+}
+
+function handleSearch(val) { renderDropdown(val); showDropdown(); }
+function showDropdown() {
+  renderDropdown(document.getElementById('globalSearch').value);
+  document.getElementById('searchDropdown').classList.add('open');
+}
+function hideDropdown() { document.getElementById('searchDropdown').classList.remove('open'); }
+
+function jumpToCode(code) {
+  hideDropdown();
+  document.getElementById('globalSearch').value = '';
+  document.querySelectorAll('.diag-chip').forEach(chip => {
+    const codeEl = chip.querySelector('.code');
+    if (codeEl && codeEl.textContent === code) {
+      chip.scrollIntoView({behavior:'smooth', block:'center'});
+      chip.click();
+      chip.style.transition = 'box-shadow 0.3s';
+      chip.style.boxShadow = '0 0 0 4px rgba(27,58,140,0.25)';
+      setTimeout(() => { chip.style.boxShadow = ''; }, 2000);
+    }
+  });
+}
+
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+    e.preventDefault();
+    document.getElementById('globalSearch').focus();
+    showDropdown();
+  }
+  if (e.key === 'Escape') { hideDropdown(); document.getElementById('globalSearch').blur(); }
+});
+
+</script>
+</body>
+</html>
